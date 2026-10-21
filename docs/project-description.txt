@@ -1,0 +1,9 @@
+Project Description
+
+DJ's adding a live musician (saxophone, violin, trumpet, etc) is increasingly common across the globe.
+
+For the musician, they need to "keep up" with the DJ mixing and transitioning to new tracks that are in different keys, have different rhythms, and varying build -> drop patterns.
+
+Musicians mostly improvise on the spot, playing by ear, and taking stage cues from the DJ for when and what to play.
+
+To greatly improve the DJ - Musician interaction, djay Pro Maestro is a plugin and web client that provides the musician a separate interface to give them visibility to the key of the track, the upcoming tracks, and performance cues (red light/green light).
