@@ -17,6 +17,13 @@ export function writtenKey(key,instrument,mode='minor'){
  const names=mode==='minor'?['C','C♯','D','E♭','E','F','F♯','G','G♯','A','B♭','B']:['C','D♭','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
  return names[(Number(key)+offset)%12];
 }
+export function deckMusic(values){
+ const active=values.loaded!==0;
+ const encoded=active?(Number.isInteger(values.playbackKey)?values.playbackKey:values.songKey):null;
+ const validKey=Number.isInteger(encoded)&&encoded>=0&&encoded<24;
+ const minor=validKey&&encoded%2===1;
+ return {key:validKey?(Math.floor(encoded/2)+(minor?9:0))%12:null,mode:minor?'minor':'major',bpm:active&&Number.isFinite(values.bpm)&&values.bpm>0?Number(values.bpm.toFixed(1)):null};
+}
 export function beatPosition(time,bpm,grid=0){
  if(!bpm||time<grid)return null;
  const beats=(time-grid)*bpm/60;

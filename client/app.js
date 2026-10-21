@@ -1,4 +1,4 @@
-import {formatTime,writtenKey,chooseCrossfaderDeck} from './music.js';
+import {formatTime,writtenKey,deckMusic,chooseCrossfaderDeck} from './music.js';
 import {loadPreferences} from './preferences.js';
 const $=id=>document.getElementById(id);
 let saved={};try{saved=loadPreferences(localStorage);}catch{}
@@ -33,7 +33,32 @@ function renderStatic(){
  $('timeStatus').textContent=!positionAvailable?'':state.playing?'Playing':'Paused';
  $('connectionText').textContent=live.stale?'Waiting for djay':`Connected · Deck ${live.deck}`;
  $('connectionText').parentElement.dataset.fresh=String(!live.stale);
+ renderOtherDeck();
  keepAwake();
+}
+function renderOtherDeck(){
+ const snapshot=live.snapshot,otherId=live.deck===1?2:1;
+ const deck=snapshot?.decks[otherId-1],values=deck?.values;
+ const elapsed=Math.max(0,Date.now()-live.received);
+ const available=live.connected&&snapshot?.status==='receiving'&&elapsed<=2500&&values?.loaded===1&&typeof values.title==='string'&&values.title.trim()!=='';
+ $('otherDeck').hidden=!available;
+ $('otherDeckTrack').textContent='';$('otherDeckDetails').textContent='';
+ $('otherDeckTrack').removeAttribute('title');
+ if(!available)return;
+ const {key,mode,bpm}=deckMusic(values);
+ const track=`Preview · Deck ${otherId} · ${values.title}${values.artist?' — '+values.artist:''}`;
+ const details=[];
+ if(key!==null)details.push(`${writtenKey(key,state.instrument,mode)} ${mode}`);
+ if(bpm!==null)details.push(`${bpm} BPM`);
+ // A paused deck may only report playback state in the five-second state dump.
+ const statusAge=snapshot.now-deck.updated?.playing+elapsed;
+ if(statusAge>=0&&statusAge<=6500){
+  if(values.playing===1)details.push('Playing');
+  else if(values.playing===0)details.push('Paused');
+ }
+ $('otherDeckTrack').textContent=track;
+ $('otherDeckTrack').setAttribute('title',track);
+ $('otherDeckDetails').textContent=details.join(' · ');
 }
 $('settingsButton').addEventListener('click',()=>$('settings').showModal());
 $('closeSettings').addEventListener('click',()=>$('settings').close());
@@ -93,10 +118,7 @@ function updateLive(){
  live.positionKnown=values.loaded===1&&Number.isFinite(values.time);
  live.stale=!live.connected||!snapshot||snapshot.status!=='receiving'||Date.now()-live.received>2500||!live.positionKnown||snapshot.now-(deck?.updated.time||0)>2500;
  const active=values.loaded!==0;
- const encoded=active?(Number.isInteger(values.playbackKey)?values.playbackKey:values.songKey):null;
- const validKey=Number.isInteger(encoded)&&encoded>=0&&encoded<24;
- const minor=validKey&&encoded%2===1;
- Object.assign(state,{title:values.loaded===0?'Empty':values.title||'Waiting for djay',duration:active&&Number.isFinite(values.duration)&&values.duration>0?values.duration:null,key:validKey?(Math.floor(encoded/2)+(minor?9:0))%12:null,mode:minor?'minor':'major',bpm:active&&values.bpm>0?Number(values.bpm.toFixed(1)):null,playing:!live.stale&&values.playing===1,position:!live.stale?Math.max(0,values.time):null});
+ Object.assign(state,deckMusic(values),{title:values.loaded===0?'Empty':values.title||'Waiting for djay',duration:active&&Number.isFinite(values.duration)&&values.duration>0?values.duration:null,playing:!live.stale&&values.playing===1,position:!live.stale?Math.max(0,values.time):null});
  updateBridgeControls();renderStatic();
 }
 function renderCue(){

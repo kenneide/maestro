@@ -39,6 +39,11 @@ progress{appearance:none;-webkit-appearance:none;border:0;display:block;backgrou
 progress::-webkit-progress-bar{background:var(--surface)}progress::-webkit-progress-value{background:var(--ink)}progress::-moz-progress-bar{background:var(--ink)}
 .track-timeline[data-available=false]{visibility:hidden}
 .track-progress{width:100%;height:4px;margin:12px 0 9px}
+.other-deck{display:flex;align-items:baseline;gap:12px;margin-top:8px;color:var(--muted);font-size:12px;line-height:1.4}
+.other-deck-track{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.other-deck-details{flex-shrink:0;white-space:nowrap}.other-deck-details:empty{display:none}
+@media(max-width:600px){.other-deck{flex-direction:column;gap:2px}.other-deck-track{flex:none;width:100%}}
+@media(max-height:540px){.other-deck{margin-top:5px;font-size:11px}}
 
 h1{font-size:clamp(18px,2.8dvh,30px);letter-spacing:-.5px;font-weight:550;margin:5px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #trackSubtitle{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;min-height:1.4em}
