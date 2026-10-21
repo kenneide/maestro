@@ -16,3 +16,12 @@ build/
 DerivedData/
 *.xcuserstate
 xcuserdata/
+
+# Editor temporary files
+*.swp
+*.swo
+*~
+
+# Imported client design previews and working files
+/client/outputs/
+/client/work/

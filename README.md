@@ -6,7 +6,24 @@ Maestro aims to give musicians visibility into the current track's key, upcoming
 
 ## Status
 
-Early MVP development. The plugin and web client are coming next.
+Early MVP development. The [Horizon web client](client/README.md) includes a local OSC bridge for djay Pro; plugin development is next.
+
+## Run the client
+
+Requires Node.js 18+. No dependency installation is needed.
+
+```sh
+npm --prefix client start
+```
+
+Open http://localhost:4173. In VS Code, select **Run client** in Run and Debug and press **F5** to start the server and open the browser automatically.
+
+```sh
+npm --prefix client run check
+npm --prefix client test
+```
+
+See the [client README](client/README.md) for djay OSC setup and rehearsal mode.
 
 ## Project docs
 

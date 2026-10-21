@@ -1,0 +1,14 @@
+{
+  "name": "horizon-musician",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node --check app.js && node --check music.js && node --check server.mjs && node --check bridge.mjs && node --check osc.mjs",
+    "test": "node --test osc.test.mjs bridge.test.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

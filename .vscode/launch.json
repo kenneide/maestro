@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run client",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/client/server.mjs",
+      "cwd": "${workspaceFolder}/client",
+      "console": "internalConsole",
+      "skipFiles": ["<node_internals>/**"],
+      "serverReadyAction": {
+        "pattern": "Horizon is ready: (http://localhost:[0-9]+)",
+        "uriFormat": "%s",
+        "action": "openExternally"
+      }
+    }
+  ]
+}
