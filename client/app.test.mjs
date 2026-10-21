@@ -28,6 +28,10 @@ test('live musician view follows decks, expires data, saves settings and filters
  get('themeToggle').listeners.click();assert.equal(document.documentElement.dataset.theme,'light');assert.equal(get('themeToggle').attributes['aria-label'],'Switch to dark mode');
  get('themeToggle').listeners.click();assert.equal(document.documentElement.dataset.theme,'dark');
  get('closeSettings').listeners.click();assert.equal(get('settings').open,false);
+ assert.equal(get('cueNext').textContent,'');
+ snapshot.cue={state:'amber',next:'green',updated:now};send();assert.equal(get('cueLight').textContent,'Ready');assert.equal(get('performerCue').dataset.action,'ready');assert.equal(get('cueNext').textContent,'Next: Play');
+ snapshot.cue={state:'amber',next:'red',updated:now};send();assert.equal(get('cueNext').textContent,'Next: Stop');assert.match(get('cueDiagnostic').textContent,/stop you/);
+ snapshot.cue={state:'green',updated:now};send();assert.equal(get('cueNext').textContent,'');
  snapshot.mixer.crossfader=.5;send();assert.equal(get('trackTitle').textContent,'Deck 1 · First');
  snapshot.mixer.crossfader=1;send();assert.equal(get('trackTitle').textContent,'Deck 2 · Second');assert.equal(get('currentTime').textContent,'1:00');assert.equal(JSON.parse(storage.get('maestro-preferences')).followedDeck,2);
  get('debugDetails').open=true;get('messageDetails').open=true;get('messageFilter').value='';get('debugDetails').listeners.toggle();assert.match(get('messageLog').textContent,/\/djay\/time/);

@@ -42,22 +42,34 @@ void testState (const juce::PropertiesFile::Options& options)
     require (processor.getDestination().host == "studio-mac.local" && processor.getDestination().port == 9010
              && processor.getDestination().webPort == 8080, "Invalid settings retain applied configuration");
     auto* cue = processor.getState().getParameter (MaestroCueProcessor::cueParamId);
-    require (cue != nullptr && cue->getText (0, 20) == "Stop" && cue->getText (1, 20) == "Play", "Stable cue ID and host labels");
-    require (cue->getValueForText ("Play") >= 0.5f && cue->getValueForText ("Stop") < 0.5f
-             && cue->getValueForText ("Green") >= 0.5f && cue->getValueForText ("Red") < 0.5f, "Cue labels parse and retain legacy text compatibility");
-    cue->setValueNotifyingHost (1);
+    using Cue = MaestroCueProcessor::Cue;
+    require (cue != nullptr && cue->getText (0, 20) == "Stop" && cue->getText (cue->convertTo0to1 (1), 20) == "Ready to Play"
+             && cue->getText (cue->convertTo0to1 (2), 20) == "Play" && cue->getText (1, 20) == "Ready to Stop", "Stable cue ID and host labels");
+    require (cue->getValueForText ("Play") == cue->convertTo0to1 (2) && cue->getValueForText ("Stop") == 0
+             && cue->getValueForText ("Green") == cue->convertTo0to1 (2) && cue->getValueForText ("Red") == 0, "Cue labels parse and retain legacy text compatibility");
+    require (processor.getCue() == Cue::stop, "Default cue is Stop");
+    const Cue cycle[] { Cue::readyToPlay, Cue::play, Cue::readyToStop, Cue::stop, Cue::readyToPlay, Cue::play, Cue::readyToStop };
+    for (auto expected : cycle)
+    {
+        processor.advanceCue();
+        require (processor.getCue() == expected, "Cue cycles Stop, Ready, Play, Ready, Stop");
+    }
     juce::MemoryBlock data;
     processor.getStateInformation (data);
     MaestroCueProcessor restored (options);
     restored.setStateInformation (data.getData(), static_cast<int> (data.getSize()));
     require (restored.getDestination().host == "studio-mac.local" && restored.getDestination().port == 9010
-             && restored.getDestination().webPort == 8080 && restored.isGreen(), "Session round-trip");
+             && restored.getDestination().webPort == 8080 && restored.getCue() == Cue::readyToStop, "Session round-trip");
     MaestroCueProcessor newInstance (options);
     require (newInstance.getDestination().webPort == 8080 && newInstance.getDestination().port == 9010, "New-instance defaults");
     const auto legacyXml = juce::parseXML ("<MaestroCue host=\"127.0.0.1\" port=\"9000\"><PARAM id=\"go\" value=\"0\"/></MaestroCue>");
     juce::AudioProcessor::copyXmlToBinary (*legacyXml, data);
     restored.setStateInformation (data.getData(), static_cast<int> (data.getSize()));
-    require (restored.getDestination().webPort == 4173 && restored.getDestination().port == 9000 && ! restored.isGreen(), "Legacy sessions default to web port 4173");
+    require (restored.getDestination().webPort == 4173 && restored.getDestination().port == 9000 && restored.getCue() == Cue::stop, "Legacy sessions default to web port 4173");
+    const auto legacyPlayXml = juce::parseXML ("<MaestroCue host=\"127.0.0.1\" port=\"9000\"><PARAM id=\"go\" value=\"1\"/></MaestroCue>");
+    juce::AudioProcessor::copyXmlToBinary (*legacyPlayXml, data);
+    restored.setStateInformation (data.getData(), static_cast<int> (data.getSize()));
+    require (restored.getCue() == Cue::play, "Legacy Play cue migrates");
     const auto malformedXml = juce::parseXML ("<MaestroCue host=\"host.local\" port=\"9000\" webPort=\"65536\"/>");
     juce::AudioProcessor::copyXmlToBinary (*malformedXml, data);
     restored.setStateInformation (data.getData(), static_cast<int> (data.getSize()));

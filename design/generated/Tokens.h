@@ -15,6 +15,7 @@ struct Palette {
     juce::Colour amber;
     juce::Colour danger;
     juce::Colour cueRed;
+    juce::Colour cueAmber;
     juce::Colour cueGreen;
     juce::Colour cueUnknown;
     juce::Colour buildWash;
@@ -22,8 +23,8 @@ struct Palette {
     juce::Colour focus;
     juce::Colour overlay;
 };
-inline const Palette dark { juce::Colour { 0xff111115 }, juce::Colour { 0xff19191f }, juce::Colour { 0xff24242d }, juce::Colour { 0xfff3f2f7 }, juce::Colour { 0xffaaa8b9 }, juce::Colour { 0xff727080 }, juce::Colour { 0xffc1b0ff }, juce::Colour { 0xffd8cdff }, juce::Colour { 0xff211638 }, juce::Colour { 0xfff2c078 }, juce::Colour { 0xffff9b98 }, juce::Colour { 0xffff918b }, juce::Colour { 0xff72d8a5 }, juce::Colour { 0xffaaa8b9 }, juce::Colour { 0xff302a42 }, juce::Colour { 0xff382f24 }, juce::Colour { 0xffd1bdff }, juce::Colour { 0xaa000000 } };
-inline const Palette light { juce::Colour { 0xfff5f4f1 }, juce::Colour { 0xffffffff }, juce::Colour { 0xffeae7f0 }, juce::Colour { 0xff22212a }, juce::Colour { 0xff646170 }, juce::Colour { 0xff8e899b }, juce::Colour { 0xff6842ad }, juce::Colour { 0xff54328e }, juce::Colour { 0xffffffff }, juce::Colour { 0xff865000 }, juce::Colour { 0xffaf2929 }, juce::Colour { 0xffb52f2a }, juce::Colour { 0xff12663d }, juce::Colour { 0xff646170 }, juce::Colour { 0xffeee8fa }, juce::Colour { 0xfffff0d9 }, juce::Colour { 0xff6842ad }, juce::Colour { 0x8817131c } };
+inline const Palette dark { juce::Colour { 0xff111115 }, juce::Colour { 0xff19191f }, juce::Colour { 0xff24242d }, juce::Colour { 0xfff3f2f7 }, juce::Colour { 0xffaaa8b9 }, juce::Colour { 0xff727080 }, juce::Colour { 0xffc1b0ff }, juce::Colour { 0xffd8cdff }, juce::Colour { 0xff211638 }, juce::Colour { 0xfff2c078 }, juce::Colour { 0xffff9b98 }, juce::Colour { 0xffff918b }, juce::Colour { 0xfff2c078 }, juce::Colour { 0xff72d8a5 }, juce::Colour { 0xffaaa8b9 }, juce::Colour { 0xff302a42 }, juce::Colour { 0xff382f24 }, juce::Colour { 0xffd1bdff }, juce::Colour { 0xaa000000 } };
+inline const Palette light { juce::Colour { 0xfff5f4f1 }, juce::Colour { 0xffffffff }, juce::Colour { 0xffeae7f0 }, juce::Colour { 0xff22212a }, juce::Colour { 0xff646170 }, juce::Colour { 0xff8e899b }, juce::Colour { 0xff6842ad }, juce::Colour { 0xff54328e }, juce::Colour { 0xffffffff }, juce::Colour { 0xff865000 }, juce::Colour { 0xffaf2929 }, juce::Colour { 0xffb52f2a }, juce::Colour { 0xff865000 }, juce::Colour { 0xff12663d }, juce::Colour { 0xff646170 }, juce::Colour { 0xffeee8fa }, juce::Colour { 0xfffff0d9 }, juce::Colour { 0xff6842ad }, juce::Colour { 0x8817131c } };
 inline constexpr int space_1 = 4;
 inline constexpr int space_2 = 8;
 inline constexpr int space_3 = 12;

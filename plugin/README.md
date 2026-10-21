@@ -1,6 +1,6 @@
 # Maestro Cue
 
-An Audio Unit effect for djay Pro that sends performance cues to the musician. The DJ flips a red/green light. The plugin sends it over OSC to the [Maestro client](../client/README.md), which shows it on stage. Audio passes through unchanged.
+An Audio Unit effect for djay Pro that sends performance cues to the musician. The DJ steps a red/amber/green light through Stop → Ready → Play → Ready → Stop. The plugin sends it over OSC to the [Maestro client](../client/README.md), which shows it on stage. Audio passes through unchanged.
 
 ## Build
 
@@ -43,7 +43,7 @@ The package is ad-hoc signed, not notarized. The recipient must open `Install Ma
 
 1. Start Maestro: `npm --prefix client start`.
 2. In djay Pro, open the audio FX / plugin slot and load **Kenneide: Maestro Cue**. Use the AU v2 or AUv3 version, whichever djay lists.
-3. Click the big button, or press Space while the main cue view has focus, to switch between **Stop** (red) and **Play** (green).
+3. Click the big button, or press Space while the main cue view has focus, to advance the cue: **Stop** (red) → **Ready** (amber, next Play) → **Play** (green) → **Ready** (amber, next Stop) → **Stop**. While Ready, the button shows **NEXT: PLAY** or **NEXT: STOP**.
 4. Optional: MIDI-map the plugin's **Cue** parameter to a controller button.
 
 The standalone app also works as a sender without djay, which is useful for rehearsal and testing. In VS Code, select **Run plugin (standalone)** in Run and Debug and press **F5**. This builds the Debug standalone app and launches it under the debugger. It needs the CodeLLDB extension.
@@ -52,7 +52,7 @@ The standalone app also works as a sender without djay, which is useful for rehe
 
 | Address | Args | Sent |
 | --- | --- | --- |
-| `/maestro/cue` | `s` `"red"` or `"green"` | On every change, and resent every second as a heartbeat |
+| `/maestro/cue` | `s` `"red"` (Stop) or `"green"` (Play); `ss` `"amber"` plus `"green"` or `"red"` (Ready, heading to Play or Stop) | On every change, and resent every second as a heartbeat |
 
 Open the gear button for **Settings → CONNECTION**: enter the IP address (or hostname, such as `studio-mac.local`) and the **OSC PORT** of the computer running Maestro. **WEB PORT** is the musician app’s HTTP port (default **4173**), separate from the OSC port. Press **Apply** or Return to save all three values together. The default is `127.0.0.1:9000`, the same computer and the same port djay's own OSC uses; the Maestro bridge receives both. Each plugin instance saves its destination and web port with the djay session; older sessions use web port 4173. The last connection settings applied become the default for new instances. Invalid edits leave the applied settings and QR link unchanged. The footer shows **Sending to** or **Send failed** for the current destination. The musician app shows **Stop** when its cue heartbeat expires or the bridge disconnects.
 
@@ -77,13 +77,13 @@ cmake --build plugin/build --config Debug --target MaestroCueTests
 ctest --test-dir plugin/build -C Debug --output-on-failure
 ```
 
-Tests use temporary preference files, never the user’s saved destinations. They cover QR links, interface filtering/selection, invalid settings, new-instance defaults, session round-trips and legacy web-port fallback, Play/Stop parameter labels and legacy text parsing, and audio passthrough. On macOS an independent Core Image test decodes the generated QR and verifies its URL. To write a QR decoding fixture, run the test executable with a PNG output path as its first argument.
+Tests use temporary preference files, never the user’s saved destinations. They cover QR links, interface filtering/selection, invalid settings, new-instance defaults, session round-trips and legacy web-port fallback, the four-step cue cycle, cue parameter labels and legacy text parsing, migration of sessions saved with the old two-state cue, and audio passthrough. On macOS an independent Core Image test decodes the generated QR and verifies its URL. To write a QR decoding fixture, run the test executable with a PNG output path as its first argument.
 
 ## Files
 
 - `CMakeLists.txt`: fetches JUCE and defines the AU, AUv3 and Standalone targets.
 - `Source/PluginProcessor.*`: the pass-through processor, the `Cue` parameter, and the OSC sender and heartbeat.
-- `Source/PluginEditor.*`: the red/green toggle UI.
+- `Source/PluginEditor.*`: the red/amber/green cue UI.
 
 ## Appearance
 

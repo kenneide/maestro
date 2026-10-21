@@ -103,9 +103,11 @@ function renderCue(){
  const cue=live.snapshot?.cue,fresh=live.connected&&cue&&live.snapshot.now-cue.updated<=3000,value=fresh?cue.state:'unknown';
  // A server started before cue support omits the field entirely; it must be restarted to receive cues.
  const outdated=live.connected&&live.snapshot&&!('cue' in live.snapshot);
- const detail=value==='green'?'The DJ is cueing you in':value==='red'?'Hold until the DJ cues you':outdated?'Maestro’s server is out of date. Restart it to receive cues.':'Waiting for the Maestro Cue plugin in djay';
- $('performerCue').dataset.action=value==='green'?'play':'stop';
- $('cueLight').textContent=value==='green'?'Play':'Stop';
+ const toPlay=value==='amber'&&cue.next==='green';
+ const detail=value==='green'?'The DJ is cueing you in':value==='red'?'Hold until the DJ cues you':value==='amber'?(toPlay?'Get ready. The DJ is about to cue you in':'Get ready. The DJ is about to stop you'):outdated?'Maestro’s server is out of date. Restart it to receive cues.':'Waiting for the Maestro Cue plugin in djay';
+ $('performerCue').dataset.action=value==='green'?'play':value==='amber'?'ready':'stop';
+ $('cueLight').textContent=value==='green'?'Play':value==='amber'?'Ready':'Stop';
+ $('cueNext').textContent=value==='amber'?`Next: ${toPlay?'Play':'Stop'}`:'';
  if($('cueDiagnostic').textContent!==detail)$('cueDiagnostic').textContent=detail;
 }
 function startBridge(){

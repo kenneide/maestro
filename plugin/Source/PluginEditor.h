@@ -56,6 +56,7 @@ private:
     juce::PropertiesFile preferences;
     std::unique_ptr<juce::Drawable> mark;
     juce::TextButton cueButton;
+    juce::Label nextLabel;
     juce::Label footer;
     juce::Component settingsPanel;
     juce::TextEditor hostField, portField, webPortField;
@@ -66,7 +67,6 @@ private:
     juce::Label connectionHeading, hostLabel, portLabel, webPortLabel, appearanceLabel;
     juce::Label musicianHeading, scanLabel, urlLabel, addressLabel, helpLabel;
     bool destinationInvalid = false;
-    juce::ButtonParameterAttachment attachment;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MaestroCueEditor)
 };

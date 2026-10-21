@@ -33,17 +33,21 @@ MaestroCueProcessor::~MaestroCueProcessor()
 juce::AudioProcessorValueTreeState::ParameterLayout MaestroCueProcessor::createLayout()
 {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
-    layout.add (std::make_unique<juce::AudioParameterBool> (juce::ParameterID { cueParamId, 1 }, "Cue", false,
-                                                            juce::AudioParameterBoolAttributes()
-                                                                .withStringFromValueFunction ([] (bool green, int)
-                                                                                              { return juce::String (green ? "Play" : "Stop"); })
-                                                                .withValueFromStringFunction ([] (const juce::String& text)
-                                                                                              {
-                                                                                                  const auto value = text.trim();
-                                                                                                  return value.equalsIgnoreCase ("Play") || value.equalsIgnoreCase ("Green")
-                                                                                                      || value.equalsIgnoreCase ("true") || value.equalsIgnoreCase ("on")
-                                                                                                      || value.getIntValue() != 0;
-                                                                                              })));
+    static const juce::StringArray names { "Stop", "Ready to Play", "Play", "Ready to Stop" };
+    layout.add (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID { cueParamId, 2 }, "Cue", names, 0,
+                                                              juce::AudioParameterChoiceAttributes()
+                                                                  .withValueFromStringFunction ([] (const juce::String& text)
+                                                                                                {
+                                                                                                    const auto value = text.trim();
+                                                                                                    if (const auto index = names.indexOf (value, true); index >= 0)
+                                                                                                        return index;
+                                                                                                    // Text accepted by the earlier Stop/Play parameter.
+                                                                                                    if (value.equalsIgnoreCase ("Green") || value.equalsIgnoreCase ("true") || value.equalsIgnoreCase ("on"))
+                                                                                                        return static_cast<int> (Cue::play);
+                                                                                                    if (value.equalsIgnoreCase ("Red") || value.equalsIgnoreCase ("false") || value.equalsIgnoreCase ("off"))
+                                                                                                        return static_cast<int> (Cue::stop);
+                                                                                                    return juce::jlimit (0, names.size() - 1, value.getIntValue());
+                                                                                                })));
     return layout;
 }
 
@@ -68,8 +72,20 @@ void MaestroCueProcessor::sendCue()
     lastSendMs = juce::Time::getMillisecondCounter();
     const auto target = getDestination();
     // DatagramSocket::write re-resolves the address whenever host or port changes.
-    connected = sender.sendToIPAddress (target.host, target.port,
-                                        juce::OSCMessage ("/maestro/cue", juce::String (isGreen() ? "green" : "red")));
+    const auto cue = getCue();
+    const auto ready = cue == Cue::readyToPlay || cue == Cue::readyToStop;
+    juce::OSCMessage message ("/maestro/cue", juce::String (ready ? "amber" : cue == Cue::play ? "green" : "red"));
+    if (ready)
+        message.addString (cue == Cue::readyToPlay ? "green" : "red");
+    connected = sender.sendToIPAddress (target.host, target.port, message);
+}
+
+void MaestroCueProcessor::advanceCue()
+{
+    auto* param = state.getParameter (cueParamId);
+    param->beginChangeGesture();
+    param->setValueNotifyingHost (param->convertTo0to1 (static_cast<float> (nextCue (getCue()))));
+    param->endChangeGesture();
 }
 
 bool MaestroCueProcessor::isValidDestination (const juce::String& host, int port)
@@ -122,6 +138,13 @@ void MaestroCueProcessor::setStateInformation (const void* data, int sizeInBytes
     if (auto xml = getXmlFromBinary (data, sizeInBytes))
         if (xml->hasTagName (state.state.getType()))
         {
+            // Sessions saved with the two-state Stop/Play parameter keep their cue.
+            if (auto* legacy = xml->getChildByAttribute ("id", legacyCueParamId))
+            {
+                const auto play = legacy->getDoubleAttribute ("value") >= 0.5;
+                legacy->setAttribute ("id", cueParamId);
+                legacy->setAttribute ("value", static_cast<int> (play ? Cue::play : Cue::stop));
+            }
             state.replaceState (juce::ValueTree::fromXml (*xml));
             // Sessions saved before the destination was configurable keep the current default.
             const juce::String host = state.state.getProperty ("host", getDestination().host);

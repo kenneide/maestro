@@ -66,7 +66,7 @@ If the Mac's Wi-Fi address changes, open the new address in Safari and add it to
 
 ## Performer cue
 
-The [Maestro Cue plugin](../plugin/README.md) sends `/maestro/cue` with `"red"` or `"green"` to the same receive port as djay. It resends the cue every second. Maestro shows **Play** for a green cue and **Stop** for a red cue, with green Play text and red Stop text. Missing or expired cues and bridge disconnections show **Stop**; cue connection details are available in **Debug**. Cue messages appear in the diagnostics message log but do not count as djay data.
+The [Maestro Cue plugin](../plugin/README.md) sends `/maestro/cue` with `"red"`, `"green"`, or `"amber"` followed by the state it is heading to (`"amber" "green"` or `"amber" "red"`) to the same receive port as djay. It resends the cue every second. Maestro shows **Play** in green, **Stop** in red, and **Ready** in amber with **Next: Play** or **Next: Stop** underneath, so musicians can prepare before the change. Missing or expired cues and bridge disconnections show **Stop**; cue connection details are available in **Debug**. Cue messages appear in the diagnostics message log but do not count as djay data.
 
 ## Musician settings
 

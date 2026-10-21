@@ -5,14 +5,18 @@
 #include "Preferences.h"
 #include "MusicianLink.h"
 
-// Pass-through audio effect that broadcasts the DJ's performance cue
-// (red = stop, green = play) to the Maestro client as /maestro/cue over OSC.
+// Pass-through audio effect that broadcasts the DJ's performance cue to the Maestro
+// client as /maestro/cue over OSC: "red" (Stop), "green" (Play), or "amber" plus the
+// state it is heading to (Ready). The DJ cycles Stop -> Ready -> Play -> Ready -> Stop.
 class MaestroCueProcessor final : public juce::AudioProcessor,
                                   private juce::AudioProcessorValueTreeState::Listener,
                                   private juce::Timer
 {
 public:
-    static constexpr const char* cueParamId = "go";
+    // Cycle order; the parameter's choice index is the enum value.
+    enum class Cue { stop, readyToPlay, play, readyToStop };
+    static constexpr const char* cueParamId = "cue";
+    static constexpr const char* legacyCueParamId = "go";
     static constexpr const char* defaultHost = "127.0.0.1";
     static constexpr int defaultPort = 9000;
     static constexpr int defaultWebPort = MusicianLink::defaultWebPort;
@@ -52,7 +56,10 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     juce::AudioProcessorValueTreeState& getState() { return state; }
-    bool isGreen() const { return cueParam->load() >= 0.5f; }
+    Cue getCue() const { return static_cast<Cue> (juce::jlimit (0, 3, juce::roundToInt (cueParam->load()))); }
+    static Cue nextCue (Cue cue) { return static_cast<Cue> ((static_cast<int> (cue) + 1) % 4); }
+    // Message thread only: moves to the next cue as a single host gesture.
+    void advanceCue();
     bool isConnected() const { return connected.load(); }
 
     Destination getDestination() const;

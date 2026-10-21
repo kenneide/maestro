@@ -18,8 +18,11 @@ main{min-height:0;display:grid;grid-template-rows:minmax(0,1.3fr) auto minmax(0,
 .stage-section{min-width:0;min-height:0;border-top:1px solid var(--line);padding-top:clamp(6px,1.4dvh,14px)}
 .stage-section .section-title{font-family:inherit;font-size:var(--type-caption);font-weight:650;line-height:1.2;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:0}
 .performer-cue{display:grid;grid-template-rows:auto minmax(0,1fr);color:var(--cue-red)}
-.cue-value{display:grid;place-items:center;min-height:0}
+/* Word stays in the centre row; the Ready subtitle hangs below without moving its baseline. */
+.cue-value{display:grid;grid-template-rows:1fr auto 1fr;justify-items:center;min-height:0}.cue-value strong{grid-row:2}
 .performer-cue[data-action=play]{color:var(--cue-green)}
+.performer-cue[data-action=ready]{color:var(--cue-amber)}
+.cue-next{grid-row:3;align-self:start;margin-top:var(--space-2);font-size:clamp(14px,3dvh,24px);font-weight:600;letter-spacing:.08em;text-transform:uppercase}.cue-next:empty{display:none}
 .performer-cue strong{font-size:clamp(64px,18dvh,180px);line-height:1;font-weight:650;letter-spacing:-.06em}
 .music-section{display:grid;grid-template-rows:auto minmax(0,1fr);gap:clamp(4px,1dvh,12px)}
 .musical-info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;align-content:center;gap:clamp(20px,5vw,70px);width:min(100%,720px);margin:0 auto;min-height:0}

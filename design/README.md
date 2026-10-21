@@ -4,9 +4,9 @@ The canonical identity and tokens for **Maestro / Musician** (web) and **Maestro
 
 ## Identity
 
-Use `mark.svg` for the geometric M; tint the white silhouette with the theme accent (CSS mask or JUCE Drawable replacement). `wordmark.svg` supplies the monochrome lockup; its text uses system Arial. Product headers use the shared mark alongside native text for legibility and accessibility. `favicon.svg` is the fixed violet app icon. Keep clear space of at least 8px around the mark. Do not use cue red or green as brand colors.
+Use `mark.svg` for the geometric M; tint the white silhouette with the theme accent (CSS mask or JUCE Drawable replacement). `wordmark.svg` supplies the monochrome lockup; its text uses system Arial. Product headers use the shared mark alongside native text for legibility and accessibility. `favicon.svg` is the fixed violet app icon. Keep clear space of at least 8px around the mark. Do not use cue red, amber or green as brand colors.
 
-Graphite surfaces and violet accents define dark mode; warm white surfaces and deeper violet define light mode. Red means **Stop** and green means **Play**. The musician app falls back to Stop if the cue signal is missing or stale. Always pair cues with visible text.
+Graphite surfaces and violet accents define dark mode; warm white surfaces and deeper violet define light mode. Red means **Stop**, amber means **Ready** (a change is coming, with the next state shown), and green means **Play**. The musician app falls back to Stop if the cue signal is missing or stale. Always pair cues with visible text.
 
 ## Tokens and adapters
 
@@ -33,6 +33,6 @@ The plugin stores its selection in a JUCE PropertiesFile (`Maestro/Maestro.setti
 
 `npm --prefix client run check` checks generated assets and JavaScript syntax. `npm --prefix client test` includes semantic text, control-boundary and focus contrast checks, theme persistence/storage failure checks, legacy preference migration, and existing OSC integration tests. Browser and standalone visual checks should cover both themes, Stop/Play, missing cues, settings, QR scanning, diagnostics, keyboard focus, and narrow layouts.
 
-Dark: graphite canvas, violet actions, pale neutral text, pale red/green cues. Light: warm white canvas, white panels, deep violet actions, charcoal text, deep red/green cues. Cue text carries the semantic color on the neutral background. The plugin’s large button retains a visible border and keyboard focus indicator. QR codes always use black modules on white with a four-module quiet zone.
+Dark: graphite canvas, violet actions, pale neutral text, pale red/amber/green cues. Light: warm white canvas, white panels, deep violet actions, charcoal text, deep red/amber/green cues. Cue text carries the semantic color on the neutral background. The plugin’s large button retains a visible border and keyboard focus indicator. QR codes always use black modules on white with a four-module quiet zone.
 
 Plugin redesign verification (2026-10-21): all 16 client tests and syntax/drift checks passed; Debug Standalone, AU, and AUv3 builds passed; both native test suites (configuration/state and independent QR decoding) passed; `auval -v aufx Mcue Knde` passed. The standalone editor was visually checked in both themes, including Settings, QR visibility, invalid and custom web ports, Escape, and Space-to-cue behavior. DAW-hosted editor interaction and scanning from a physical phone still need manual review.

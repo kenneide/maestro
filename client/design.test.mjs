@@ -11,8 +11,8 @@ const luminance=hex=>{
 const contrast=(a,b)=>{const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);};
 test('shared theme text, cue, border and focus contrast',()=>{
  for(const p of Object.values(tokens.themes)){
-  for(const bg of ['bg','surface','raised'])for(const fg of ['ink','muted','accent','amber','cueRed','cueGreen','cueUnknown'])assert.ok(contrast(p[fg],p[bg])>=4.5,`${fg} on ${bg}`);
-  for(const fg of ['cueRed','cueGreen','cueUnknown'])for(const bg of ['bg','surface']){
+  for(const bg of ['bg','surface','raised'])for(const fg of ['ink','muted','accent','amber','cueRed','cueAmber','cueGreen','cueUnknown'])assert.ok(contrast(p[fg],p[bg])>=4.5,`${fg} on ${bg}`);
+  for(const fg of ['cueRed','cueAmber','cueGreen','cueUnknown'])for(const bg of ['bg','surface']){
    const mixed='#'+p[fg].slice(1).match(/../g).map((v,i)=>Math.round(parseInt(v,16)*.14+parseInt(p[bg].slice(1+i*2,3+i*2),16)*.86).toString(16).padStart(2,'0')).join('');
    assert.ok(contrast(p[fg],mixed)>=4.5,`${fg} on tinted ${bg}`);
   }

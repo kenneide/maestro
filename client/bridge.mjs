@@ -18,7 +18,10 @@ export function createBridge({receivePort=9000,requestPort=9001,receiveHost='127
   incomingPackets++;lastIncoming=receivedAt;lastSender=sender;
   let messages;try{messages=decodePacket(packet);}catch(e){malformed++;record({timestamp:receivedAt,sender,error:e.message,hex:packet.subarray(0,64).toString('hex')});return;}
   for(const message of messages)record({timestamp:receivedAt,sender,address:clipped(message.address),args:message.args.slice(0,16).map(value=>typeof value==='string'&&value.length>64?value.slice(0,64)+'…':value),omittedArgs:Math.max(0,message.args.length-16)});
-  for(const message of messages)if(message.address==='/maestro/cue'&&message.args.length===1&&['red','green'].includes(message.args[0]))cue={state:message.args[0],updated:receivedAt};
+  // Cue: "red" (Stop), "green" (Play), or "amber" plus the state it is heading to (Ready).
+  for(const message of messages)if(message.address==='/maestro/cue'){const [state,next]=message.args;
+   if(message.args.length===1&&['red','green'].includes(state))cue={state,updated:receivedAt};
+   else if(message.args.length===2&&state==='amber'&&['red','green'].includes(next))cue={state,next,updated:receivedAt};}
   const valid=messages.filter(m=>m.address.startsWith('/djay/'));if(!valid.length)return;
   const now=Date.now();if(lastPacket&&now-lastPacket>5000){decks=Array.from({length:4},(_,i)=>newDeck(i+1));session=randomUUID();mixer={crossfader:null};dump();}
   lastPacket=now;packets++;

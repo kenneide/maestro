@@ -6,7 +6,7 @@ Maestro aims to give musicians visibility into the current track's key, upcoming
 
 ## Status
 
-Early MVP development. The [Maestro web client](client/README.md) includes a local OSC bridge for djay Pro. The [Maestro Cue plugin](plugin/README.md) is an Audio Unit for djay Pro. It sends red/green performance cues to Maestro.
+Early MVP development. The [Maestro web client](client/README.md) includes a local OSC bridge for djay Pro. The [Maestro Cue plugin](plugin/README.md) is an Audio Unit for djay Pro. It sends red/amber/green performance cues (Stop / Ready / Play) to Maestro.
 
 ## Run the client
 

@@ -1,7 +1,7 @@
-Maestro Cue: red/green performer cues from djay Pro
+Maestro Cue: red/amber/green performer cues from djay Pro
 ====================================================
 
-Maestro Cue is an Audio Unit plugin for djay Pro. The DJ flips a red (STOP) / green (PLAY) light, and the plugin sends it to the Maestro musician app over OSC. Audio passes through unchanged.
+Maestro Cue is an Audio Unit plugin for djay Pro. The DJ steps a red (STOP) / amber (READY) / green (PLAY) light, and the plugin sends it to the Maestro musician app over OSC. Audio passes through unchanged.
 
 Requirements
 ------------
@@ -30,9 +30,10 @@ The installer puts the plugin in ~/Library/Audio/Plug-Ins/Components and the app
 Use
 ---
 - Click the big button, or press Space while the main cue view has focus,
-  to switch between STOP (red) and PLAY (green).
+  to advance: STOP (red) -> READY (amber, next Play) -> PLAY (green)
+  -> READY (amber, next Stop) -> STOP.
 - To use a controller button, MIDI-map the plugin's "Cue" parameter in djay.
-- Maestro shows Play/Stop. It shows "Stop" if it has heard
+- Maestro shows Stop, Ready (with what comes next) or Play. It shows "Stop" if it has heard
   nothing for 3 seconds.
 
 Uninstall

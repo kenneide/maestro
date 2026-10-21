@@ -72,17 +72,20 @@ void MaestroCueEditor::QrView::paint (juce::Graphics& g)
 }
 
 MaestroCueEditor::MaestroCueEditor (MaestroCueProcessor& p)
-    : AudioProcessorEditor (p), cueProcessor (p), preferences (maestroPreferenceOptions()),
-      attachment (*p.getState().getParameter (MaestroCueProcessor::cueParamId), cueButton)
+    : AudioProcessorEditor (p), cueProcessor (p), preferences (maestroPreferenceOptions())
 {
     light = preferences.getBoolValue ("light", false);
     mark = juce::Drawable::createFromImageData (BinaryData::mark_svg, BinaryData::mark_svgSize);
     setLookAndFeel (&look);
     cueButton.setComponentID ("cue");
-    cueButton.setClickingTogglesState (true);
-    cueButton.setTitle ("Performance cue");
-    cueButton.onStateChange = [this] { refresh(); };
+    cueButton.onClick = [this] { cueProcessor.advanceCue(); refresh(); };
     addAndMakeVisible (cueButton);
+    // Shows where a Ready cue is heading; a child so it hides with the button.
+    nextLabel.setJustificationType (juce::Justification::centred);
+    nextLabel.setFont (juce::FontOptions (static_cast<float> (MaestroDesign::type_heading), juce::Font::bold));
+    nextLabel.setInterceptsMouseClicks (false, false);
+    nextLabel.setAccessible (false);
+    cueButton.addAndMakeVisible (nextLabel);
     settingsButton.onClick = [this] { showSettings (! settingsOpen); };
     addAndMakeVisible (settingsButton);
     addChildComponent (settingsPanel);
@@ -193,6 +196,7 @@ void MaestroCueEditor::resized()
 {
     settingsButton.setBounds (getWidth() - 68, 20, 44, 44);
     cueButton.setBounds (24, 130, getWidth() - 48, 362);
+    nextLabel.setBounds (0, cueButton.getHeight() - 88, cueButton.getWidth(), 32);
     settingsPanel.setBounds (24, 82, getWidth() - 48, 430);
     connectionHeading.setBounds (0, 12, 432, 16);
     hostLabel.setBounds (0, 34, 224, 14);
@@ -298,9 +302,17 @@ void MaestroCueEditor::refresh()
 {
     look.palette = light ? MaestroDesign::light : MaestroDesign::dark;
     const auto& palette = look.palette;
-    const auto green = cueButton.getToggleState();
-    const auto colour = green ? palette.cueGreen : palette.cueRed;
-    cueButton.setButtonText (green ? "Play" : "Stop");
+    using Cue = MaestroCueProcessor::Cue;
+    const auto cue = cueProcessor.getCue();
+    const auto ready = cue == Cue::readyToPlay || cue == Cue::readyToStop;
+    const auto colour = cue == Cue::play ? palette.cueGreen : ready ? palette.cueAmber : palette.cueRed;
+    const juce::String text = cue == Cue::play ? "Play" : ready ? "Ready" : "Stop";
+    const juce::String next = cue == Cue::readyToPlay ? "Play" : cue == Cue::readyToStop ? "Stop" : "";
+    cueButton.setButtonText (text);
+    cueButton.setTitle ("Performance cue: " + text + (ready ? ", next " + next : juce::String()));
+    cueButton.setTooltip ("Click or press Space to advance the cue");
+    nextLabel.setText (ready ? "NEXT: " + next.toUpperCase() : juce::String(), juce::dontSendNotification);
+    nextLabel.setColour (juce::Label::textColourId, colour);
     cueButton.setColour (juce::TextButton::buttonColourId, palette.bg);
     cueButton.setColour (juce::TextButton::buttonOnColourId, palette.bg);
     cueButton.setColour (juce::TextButton::textColourOffId, colour);
