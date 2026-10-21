@@ -15,7 +15,10 @@ MaestroCueProcessor::MaestroCueProcessor()
 {
     cueParam = state.getRawParameterValue (cueParamId);
     state.addParameterListener (cueParamId, this);
-    sender.connectToSocket (socket, oscHost, oscPort);
+    const Destination saved { preferences.getValue ("destinationHost", defaultHost),
+                              preferences.getIntValue ("destinationPort", defaultPort) };
+    destination = isValidDestination (saved.host, saved.port) ? saved : Destination { defaultHost, defaultPort };
+    sender.connectToSocket (socket, destination.host, destination.port);
     startTimerHz (timerHz);
 }
 
@@ -54,12 +57,52 @@ void MaestroCueProcessor::timerCallback()
 void MaestroCueProcessor::sendCue()
 {
     lastSendMs = juce::Time::getMillisecondCounter();
-    connected = sender.send ("/maestro/cue", juce::String (isGreen() ? "green" : "red"));
+    const auto target = getDestination();
+    // DatagramSocket::write re-resolves the address whenever host or port changes.
+    connected = sender.sendToIPAddress (target.host, target.port,
+                                        juce::OSCMessage ("/maestro/cue", juce::String (isGreen() ? "green" : "red")));
+}
+
+bool MaestroCueProcessor::isValidDestination (const juce::String& host, int port)
+{
+    return host.isNotEmpty() && host.length() <= 253 && ! host.containsAnyOf (" \t/:")
+        && port >= 1 && port <= 65535;
+}
+
+MaestroCueProcessor::Destination MaestroCueProcessor::getDestination() const
+{
+    const juce::SpinLock::ScopedLockType lock (destinationLock);
+    return destination;
+}
+
+void MaestroCueProcessor::storeDestination (const Destination& next)
+{
+    {
+        const juce::SpinLock::ScopedLockType lock (destinationLock);
+        destination = next;
+    }
+    dirty = true;
+}
+
+bool MaestroCueProcessor::setDestination (const juce::String& host, int port)
+{
+    const auto trimmed = host.trim();
+    if (! isValidDestination (trimmed, port))
+        return false;
+    storeDestination ({ trimmed, port });
+    preferences.setValue ("destinationHost", trimmed);
+    preferences.setValue ("destinationPort", port);
+    preferences.saveIfNeeded();
+    return true;
 }
 
 void MaestroCueProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-    if (auto xml = state.copyState().createXml())
+    auto copy = state.copyState();
+    const auto target = getDestination();
+    copy.setProperty ("host", target.host, nullptr);
+    copy.setProperty ("port", target.port, nullptr);
+    if (auto xml = copy.createXml())
         copyXmlToBinary (*xml, destData);
 }
 
@@ -67,7 +110,14 @@ void MaestroCueProcessor::setStateInformation (const void* data, int sizeInBytes
 {
     if (auto xml = getXmlFromBinary (data, sizeInBytes))
         if (xml->hasTagName (state.state.getType()))
+        {
             state.replaceState (juce::ValueTree::fromXml (*xml));
+            // Sessions saved before the destination was configurable keep the current default.
+            const juce::String host = state.state.getProperty ("host", getDestination().host);
+            const int port = state.state.getProperty ("port", getDestination().port);
+            if (isValidDestination (host, port))
+                storeDestination ({ host, port });
+        }
 }
 
 juce::AudioProcessorEditor* MaestroCueProcessor::createEditor()

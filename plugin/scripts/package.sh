@@ -1,6 +1,7 @@
 #!/bin/bash
 # Builds a universal (arm64 + x86_64), ad-hoc signed Maestro Cue package and zips it
 # for installing on another Mac. Output: plugin/dist/MaestroCue-<version>-macOS.zip
+# --reveal selects the zip in Finder when done.
 set -euo pipefail
 
 plugin_dir="$(cd "$(dirname "$0")/.." && pwd)"
@@ -38,3 +39,5 @@ done
 
 ditto -c -k --keepParent "$stage" "$zip"
 echo "==> Done: $zip"
+[[ "${1:-}" == "--reveal" ]] && open -R "$zip"
+exit 0

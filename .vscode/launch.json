@@ -44,6 +44,18 @@
       "program": "${workspaceFolder}/plugin/build/MaestroCue_artefacts/Debug/Standalone/Maestro Cue.app/Contents/MacOS/Maestro Cue",
       "cwd": "${workspaceFolder}/plugin",
       "preLaunchTask": "Build plugin standalone (Debug)"
+    },
+    {
+      "name": "Package plugin for sharing",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "${workspaceFolder}/plugin/scripts/package.sh",
+        "--reveal"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
     }
   ]
 }

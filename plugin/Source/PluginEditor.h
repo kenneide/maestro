@@ -18,6 +18,7 @@ public:
 private:
     void timerCallback() override;
     void refresh();
+    void applyDestination();
 
     MaestroCueProcessor& cueProcessor;
     class Look final : public juce::LookAndFeel_V4
@@ -26,6 +27,8 @@ private:
         MaestroDesign::Palette palette = MaestroDesign::dark;
         void drawButtonBackground (juce::Graphics&, juce::Button&, const juce::Colour&, bool, bool) override;
         juce::Font getTextButtonFont (juce::TextButton&, int) override;
+        void fillTextEditorBackground (juce::Graphics&, int, int, juce::TextEditor&) override;
+        void drawTextEditorOutline (juce::Graphics&, int, int, juce::TextEditor&) override;
     } look;
     bool light = false;
     juce::PropertiesFile preferences;
@@ -33,6 +36,9 @@ private:
     juce::TextButton themeButton;
     juce::TextButton cueButton;
     juce::Label footer;
+    juce::TextEditor hostField, portField;
+    juce::TextButton applyButton;
+    bool destinationInvalid = false;
     juce::ButtonParameterAttachment attachment;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MaestroCueEditor)

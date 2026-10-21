@@ -33,6 +33,8 @@ Development builds are signed ad hoc. If djay refuses to load the AUv3 extension
 bash plugin/scripts/package.sh
 ```
 
+In VS Code, you can instead select **Package plugin for sharing** in Run and Debug and press **F5**; when it finishes, Finder opens with the zip selected.
+
 This builds a universal (Apple silicon + Intel) Release in `plugin/build-dist`. It then writes `plugin/dist/MaestroCue-<version>-macOS.zip`. The zip contains the AU v2 component, the app with the embedded AUv3, install and uninstall scripts, and a `READ ME.txt` for the recipient. The version comes from `project(... VERSION ...)` in `CMakeLists.txt`.
 
 The package is ad-hoc signed, not notarized. The recipient must open `Install Maestro Cue.command` with right-click → Open the first time. The installer copies the plugin to `~/Library/Audio/Plug-Ins/Components` and the app to `~/Applications`. It also clears the download quarantine, refreshes the Audio Unit cache, registers the AUv3 and runs `auval`. A warning-free install would need a Developer ID certificate and notarization.
@@ -52,7 +54,9 @@ The standalone app also works as a sender without djay, which is useful for rehe
 | --- | --- | --- |
 | `/maestro/cue` | `s` `"red"` or `"green"` | On every change, and resent every second as a heartbeat |
 
-The destination is fixed at `127.0.0.1:9000` in this iteration. That is the same port djay's own OSC uses, and the Maestro bridge receives both. Maestro shows **NO CUE SIGNAL** when it has not received a heartbeat for 3 seconds.
+Set the destination under **SEND TO** in the plugin window: enter the IP address (or hostname, such as `studio-mac.local`) and the UDP port of the computer running Maestro, then press **Apply** or Return. The default is `127.0.0.1:9000`, the same computer and the same port djay's own OSC uses; the Maestro bridge receives both. Each plugin instance saves its destination with the djay session. The last destination applied becomes the default for new instances. The footer shows **Sending to** or **Send failed** for the current destination. Maestro shows **NO CUE SIGNAL** when it has not received a heartbeat for 3 seconds.
+
+To send to another computer, start Maestro there with **Run client — Wi-Fi**, then use one of the LAN addresses it lists under *OSC connection setup & diagnostics*, with port 9000. The first time cues go to another computer, macOS may ask whether djay (or Maestro Cue) can find devices on your local network. Choose **Allow**. To change it later, go to System Settings → Privacy & Security → Local Network.
 
 The plugin never sends cues from the audio thread. Parameter changes, including host automation, set a flag. A 30 Hz message-thread timer then sends the cue.
 

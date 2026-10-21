@@ -7,7 +7,7 @@ Requirements
 ------------
 - macOS 11 or later (Apple silicon or Intel)
 - djay Pro for Mac
-- Maestro running on the same Mac. The plugin sends to 127.0.0.1:9000.
+- Maestro (the musician's app) running on this Mac or on another computer on the same Wi-Fi.
 
 Install
 -------
@@ -19,6 +19,11 @@ Install
 4. In djay, open an audio FX / plugin slot and load "Kenneide: Maestro Cue".
    If djay lists the plugin twice, either one works. If djay doesn't list it,
    open "Maestro Cue" from your Applications folder once, then restart djay.
+
+Point the plugin at Maestro
+---------------------------
+In the plugin window, under SEND TO, enter the IP address and port of the computer running Maestro, then press Apply. Maestro lists its addresses under "OSC connection setup & diagnostics"; the port is normally 9000. Leave 127.0.0.1 if Maestro runs on this Mac.
+If macOS asks whether djay can find devices on your local network, choose Allow.
 
 The installer puts the plugin in ~/Library/Audio/Plug-Ins/Components and the app in ~/Applications.
 

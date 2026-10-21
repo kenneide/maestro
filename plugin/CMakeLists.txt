@@ -35,7 +35,9 @@ juce_add_plugin(MaestroCue
     EDITOR_WANTS_KEYBOARD_FOCUS TRUE
     COPY_PLUGIN_AFTER_BUILD TRUE
     APP_SANDBOX_ENABLED TRUE
-    APP_SANDBOX_OPTIONS com.apple.security.network.client)
+    APP_SANDBOX_OPTIONS com.apple.security.network.client
+    # Sending cues to another computer triggers macOS's Local Network permission prompt.
+    PLIST_TO_MERGE "<plist><dict><key>NSLocalNetworkUsageDescription</key><string>Maestro Cue sends performance cues to the Maestro app on another computer.</string></dict></plist>")
 
 juce_add_binary_data(MaestroBrand SOURCES ../design/mark.svg)
 target_link_libraries(MaestroCue PRIVATE MaestroBrand)

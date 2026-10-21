@@ -2,6 +2,7 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_osc/juce_osc.h>
+#include "Preferences.h"
 
 // Pass-through audio effect that broadcasts the DJ's performance cue
 // (red = hold, green = play) to the Maestro client as /maestro/cue over OSC.
@@ -11,8 +12,14 @@ class MaestroCueProcessor final : public juce::AudioProcessor,
 {
 public:
     static constexpr const char* cueParamId = "go";
-    static constexpr const char* oscHost = "127.0.0.1";
-    static constexpr int oscPort = 9000;
+    static constexpr const char* defaultHost = "127.0.0.1";
+    static constexpr int defaultPort = 9000;
+
+    struct Destination
+    {
+        juce::String host;
+        int port = defaultPort;
+    };
 
     MaestroCueProcessor();
     ~MaestroCueProcessor() override;
@@ -45,6 +52,12 @@ public:
     bool isGreen() const { return cueParam->load() >= 0.5f; }
     bool isConnected() const { return connected.load(); }
 
+    Destination getDestination() const;
+    // Validates, stores with this instance's state, and remembers it as the default
+    // for new instances. Returns false (and keeps the old destination) if invalid.
+    bool setDestination (const juce::String& host, int port);
+    static bool isValidDestination (const juce::String& host, int port);
+
 private:
     static juce::AudioProcessorValueTreeState::ParameterLayout createLayout();
 
@@ -52,6 +65,7 @@ private:
     void parameterChanged (const juce::String&, float) override { dirty = true; }
     void timerCallback() override;
     void sendCue();
+    void storeDestination (const Destination&);
 
     juce::AudioProcessorValueTreeState state;
     std::atomic<float>* cueParam = nullptr;
@@ -59,6 +73,10 @@ private:
     // without the network.server entitlement denies. sendto() needs only network.client.
     juce::DatagramSocket socket { false };
     juce::OSCSender sender;
+    juce::PropertiesFile preferences { maestroPreferenceOptions() };
+    // Written on the message thread, but setStateInformation may come from another thread.
+    mutable juce::SpinLock destinationLock;
+    Destination destination;
     std::atomic<bool> dirty { true };
     std::atomic<bool> connected { false };
     juce::uint32 lastSendMs = 0;
