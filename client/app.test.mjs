@@ -1,0 +1,36 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+import {formatTime,writtenKey,chooseCrossfaderDeck} from './music.js';
+import {loadPreferences} from './preferences.js';
+
+test('live musician view follows decks, expires data, saves settings and filters diagnostics',()=>{
+ const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+ const elements=new Map([...html.matchAll(/id="([^"]+)"/g)].map(([,id])=>[id,{textContent:'',value:'',dataset:{},listeners:{},children:[],parentElement:{dataset:{}},classList:{toggle(){}},addEventListener(type,fn){this.listeners[type]=fn;},setAttribute(){},focus(){},showModal(){this.open=true;},close(){this.open=false;}}]));
+ elements.get('beatDots').children=Array.from({length:4},()=>({classList:{toggle(){}}}));
+ const storage=new Map();let events,timer,now=10000;
+ const document={getElementById:id=>{assert.ok(elements.has(id),`Missing element ${id}`);return elements.get(id);},documentElement:{dataset:{}},visibilityState:'visible',addEventListener(){}};
+ const context={document,window:{maestroTheme:{set(){}}},navigator:{},localStorage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)},matchMedia:()=>({matches:false}),EventSource:class{constructor(){events=this;}},setInterval(fn){timer=fn;},setTimeout(){},clearTimeout(){},Date:class extends Date{static now(){return now;}},formatTime,writtenKey,chooseCrossfaderDeck,loadPreferences};
+ const script=readFileSync(new URL('./app.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
+ vm.runInNewContext(script,context);
+ const get=id=>elements.get(id);
+ assert.equal(get('trackTitle').textContent,'Waiting for djay');
+ assert.equal(get('currentTime').textContent,'—');
+ const deck=(title,time)=>({values:{loaded:1,title,artist:'Artist',duration:240,time,songKey:0,bpm:120,bar:4,beat:2,playing:1,loop:0},updated:{time:now}});
+ const snapshot={now,status:'receiving',decks:[deck('First',30),deck('Second',60),deck('',0),deck('',0)],mixer:{crossfader:0},cue:{state:'green',updated:now},addresses:[],recentMessages:[{timestamp:now,sender:{address:'127.0.0.1',port:9000},address:'/djay/time',args:[30]}]};
+ const send=()=>events.onmessage({data:JSON.stringify(snapshot)});
+ send();assert.equal(get('trackTitle').textContent,'First');assert.equal(get('currentTime').textContent,'0:30');assert.equal(get('writtenKey').textContent,'A');assert.equal(get('cueLight').textContent,'GREEN · PLAY');
+ get('settingsButton').listeners.click();assert.equal(get('settings').open,true);
+ get('instrument').listeners.change({target:{value:'F'}});assert.equal(get('writtenKey').textContent,'G');assert.equal(JSON.parse(storage.get('maestro-preferences')).instrument,'F');
+ get('closeSettings').listeners.click();assert.equal(get('settings').open,false);
+ snapshot.mixer.crossfader=.5;send();assert.equal(get('trackTitle').textContent,'First');
+ snapshot.mixer.crossfader=1;send();assert.equal(get('trackTitle').textContent,'Second');assert.equal(get('currentTime').textContent,'1:00');assert.equal(JSON.parse(storage.get('maestro-preferences')).followedDeck,2);
+ get('debugDetails').open=true;get('messageDetails').open=true;get('messageFilter').value='';get('debugDetails').listeners.toggle();assert.match(get('messageLog').textContent,/\/djay\/time/);
+ get('messageFilter').value='unmatched';get('messageFilter').listeners.input();assert.equal(get('messageLog').textContent,'No messages match this filter.');
+ get('clearMessageFilter').listeners.click();assert.match(get('messageLog').textContent,/\/djay\/time/);
+ now+=3500;timer();assert.equal(get('currentTime').textContent,'—');assert.equal(get('timeStatus').textContent,'Position unavailable');assert.equal(get('cueLight').textContent,'NO CUE SIGNAL');
+ snapshot.now=now;snapshot.decks[1]=deck('Recovered',90);snapshot.cue={state:'red',updated:now};send();assert.equal(get('currentTime').textContent,'1:30');assert.equal(get('cueLight').textContent,'RED · HOLD');
+ snapshot.decks[1]={values:{loaded:0},updated:{}};send();assert.equal(get('writtenKey').textContent,'—');assert.equal(get('duration').textContent,'—');
+ events.onerror();assert.equal(get('connectionText').textContent,'Waiting for djay');
+});

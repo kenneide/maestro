@@ -13,7 +13,7 @@ export function formatTime(seconds,precise=false){
 }
 export function writtenKey(key,instrument,mode='minor'){
  if(key===null)return '—';
- const offset={alto:9,baritone:9,tenor:2,soprano:2,concert:0}[instrument]??0;
+ const offset={C:0,Bb:2,Eb:9,F:7}[instrument]??0;
  const names=mode==='minor'?['C','C♯','D','E♭','E','F','F♯','G','G♯','A','B♭','B']:['C','D♭','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
  return names[(Number(key)+offset)%12];
 }

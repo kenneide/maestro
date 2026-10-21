@@ -24,7 +24,7 @@ test('Maestro preferences migrate existing musician settings once',()=>{
  const values=new Map([['horizon-preferences',JSON.stringify({instrument:'tenor',horizon:20,volume:.4,followedDeck:2})]]);
  const storage={getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v)};
  const migrated=loadPreferences(storage);
- assert.deepEqual(migrated,{instrument:'tenor',horizon:20,volume:.4,followedDeck:2});
+ assert.deepEqual(migrated,{instrument:'Bb',horizon:20,volume:.4,followedDeck:2});
  assert.equal(values.get('maestro-preferences'),JSON.stringify(migrated));
  values.set('horizon-preferences','{}');
  assert.deepEqual(loadPreferences(storage),migrated);
@@ -42,4 +42,11 @@ test('theme applies before rendering, persists, and tolerates unavailable storag
  }
  const context={document:{addEventListener(){},readyState:'loading',documentElement:{dataset:{}},querySelector:()=>null},window:{},get localStorage(){throw Error();}};
  vm.runInNewContext(script,context);assert.equal(context.document.documentElement.dataset.theme,'dark');
+});
+
+test('instrument preferences support keys and migrate saxophone choices',()=>{
+ for(const [before,after] of Object.entries({concert:'C',tenor:'Bb',soprano:'Bb',alto:'Eb',baritone:'Eb',C:'C',Bb:'Bb',Eb:'Eb',F:'F',invalid:'Eb'})){
+  assert.equal(loadPreferences({getItem:()=>JSON.stringify({instrument:before})}).instrument,after);
+ }
+ assert.equal(loadPreferences({getItem:()=>null}).instrument,'Eb');
 });
