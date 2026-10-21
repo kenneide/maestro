@@ -6,6 +6,13 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum macOS version")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_program(MAESTRO_NODE node REQUIRED)
+execute_process(COMMAND "${MAESTRO_NODE}" "${CMAKE_CURRENT_SOURCE_DIR}/../design/generate.mjs" --check
+    RESULT_VARIABLE MAESTRO_DESIGN_RESULT)
+if(NOT MAESTRO_DESIGN_RESULT EQUAL 0)
+    message(FATAL_ERROR "Shared design assets are stale. Run node design/generate.mjs")
+endif()
+
 include(FetchContent)
 FetchContent_Declare(JUCE
     GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
@@ -29,6 +36,9 @@ juce_add_plugin(MaestroCue
     COPY_PLUGIN_AFTER_BUILD TRUE
     APP_SANDBOX_ENABLED TRUE
     APP_SANDBOX_OPTIONS com.apple.security.network.client)
+
+juce_add_binary_data(MaestroBrand SOURCES ../design/mark.svg)
+target_link_libraries(MaestroCue PRIVATE MaestroBrand)
 
 target_sources(MaestroCue
     PRIVATE

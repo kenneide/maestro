@@ -43,5 +43,5 @@ cat <<'EOF'
 Next steps:
   1. Quit and reopen djay Pro.
   2. Load "Kenneide: Maestro Cue" in a djay audio FX / plugin slot.
-  3. Run Horizon on this Mac to see the cue light (the plugin sends to 127.0.0.1:9000).
+  3. Run Maestro on this Mac to see the cue light (the plugin sends to 127.0.0.1:9000).
 EOF

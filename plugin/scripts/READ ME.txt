@@ -1,13 +1,13 @@
 Maestro Cue: red/green performer cues from djay Pro
 ====================================================
 
-Maestro Cue is an Audio Unit plugin for djay Pro. The DJ flips a red (HOLD) / green (PLAY) light, and the plugin sends it to the Horizon musician app over OSC. Audio passes through unchanged.
+Maestro Cue is an Audio Unit plugin for djay Pro. The DJ flips a red (HOLD) / green (PLAY) light, and the plugin sends it to the Maestro musician app over OSC. Audio passes through unchanged.
 
 Requirements
 ------------
 - macOS 11 or later (Apple silicon or Intel)
 - djay Pro for Mac
-- Horizon running on the same Mac. The plugin sends to 127.0.0.1:9000.
+- Maestro running on the same Mac. The plugin sends to 127.0.0.1:9000.
 
 Install
 -------
@@ -27,7 +27,7 @@ Use
 - Click the big button, or press Space while the plugin window has focus,
   to switch between HOLD (red) and PLAY (green).
 - To use a controller button, MIDI-map the plugin's "Cue" parameter in djay.
-- Horizon shows the light. It shows "NO CUE SIGNAL" if it has heard
+- Maestro shows the light. It shows "NO CUE SIGNAL" if it has heard
   nothing for 3 seconds.
 
 Uninstall

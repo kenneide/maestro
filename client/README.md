@@ -1,4 +1,4 @@
-# Horizon
+# Maestro
 
 A local musician companion for a saxophonist. Run the browser on your Mac and move it to the iPad extended display.
 
@@ -14,7 +14,7 @@ Open http://localhost:4173. Keep Terminal open and stop with Control-C. Node.js 
 
 In VS Code, open the repository folder, select **Run client** in Run and Debug, and press **F5**. This starts the Node server under the debugger and opens the client in your default browser when it is ready. Stop the debug session to stop the server.
 
-On macOS, `zsh "client/Start Horizon.command"` also starts the server and opens the browser.
+On macOS, `zsh "client/Start Maestro.command"` also starts the server and opens the browser.
 
 ## Connect djay
 
@@ -26,7 +26,7 @@ In djay Pro → Settings → Advanced, configure:
 | OSC destination port | 9000 |
 | Incoming OSC request port | 9001 |
 
-Start OSC sending, then open Horizon. The app starts in **Follow djay** mode. Horizon follows the crossfader endpoints: fully left selects Deck 1, fully right selects Deck 2, and every position between them retains the current song—even if its deck pauses. A 0.001 tolerance handles endpoint rounding. The last followed deck persists across page reloads; before an endpoint is observed, the saved deck (initially Deck 1) is retained. This assumes normal two-deck routing, not custom assignments or an external mixer. Missing crossfader data never triggers a playback-based handoff. The page shows connection details under **OSC connection setup & diagnostics**.
+Start OSC sending, then open Maestro. The app starts in **Follow djay** mode. Maestro follows the crossfader endpoints: fully left selects Deck 1, fully right selects Deck 2, and every position between them retains the current song—even if its deck pauses. A 0.001 tolerance handles endpoint rounding. The last followed deck persists across page reloads; before an endpoint is observed, the saved deck (initially Deck 1) is retained. This assumes normal two-deck routing, not custom assignments or an external mixer. Missing crossfader data never triggers a playback-based handoff. The page shows connection details under **OSC connection setup & diagnostics**.
 
 The local Node server receives OSC over UDP and pushes snapshots to the browser using Server-Sent Events. By default, all sockets bind to the Mac loopback address. The Wi-Fi launch option below exposes only the UDP receiver; the browser server remains local. It requests `/djay/request/dumpAll` on startup, browser connection, observed track replacement, recovery, and every five seconds. A central limiter prevents requests less than 1.1 seconds apart. No playback, key, mixer or other DJ controls are sent.
 
@@ -68,7 +68,7 @@ Automatically switching decks, receiving a changed title/duration or unload, or 
 
 ## Performer cue
 
-The [Maestro Cue plugin](../plugin/README.md) sends `/maestro/cue` with `"red"` or `"green"` to the same receive port as djay. It resends the cue every second. Horizon shows a large red (hold) or green (play) light above the track. If no cue has arrived for 3 seconds, or the bridge disconnects, Horizon shows **NO CUE SIGNAL**. Cue messages appear in the diagnostics message log but do not count as djay data.
+The [Maestro Cue plugin](../plugin/README.md) sends `/maestro/cue` with `"red"` or `"green"` to the same receive port as djay. It resends the cue every second. Maestro shows a large red (hold) or green (play) light above the track. If no cue has arrived for 3 seconds, or the bridge disconnects, Maestro shows **NO CUE SIGNAL**. Cue messages appear in the diagnostics message log but do not count as djay data.
 
 ## Rehearsal
 
@@ -87,3 +87,7 @@ Run `npm test` for parser/reducer and isolated loopback bridge tests. Tests use 
 - `music.js`: instrument transposition and time/beat helpers.
 
 Default ports can be changed with `PORT`, `OSC_PORT`, and `DJAY_PORT`. `OSC_HOST` controls the UDP bind address (default `127.0.0.1`); `DJAY_HOST` controls the request destination (default `127.0.0.1`, empty disables requests); the in-app diagnostics show the effective values. Only one server should own the production UDP receiver. No cloud hosting, analytics, or external dependencies.
+
+## Appearance
+
+Maestro defaults to dark mode. The header's **Light mode / Dark mode** button remembers your selection in this browser. Existing Horizon musician preferences migrate automatically. The [shared design system](../design/README.md) contains the source colors, spacing, typography, and brand assets used by the web client and plugin.

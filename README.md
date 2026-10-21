@@ -6,7 +6,7 @@ Maestro aims to give musicians visibility into the current track's key, upcoming
 
 ## Status
 
-Early MVP development. The [Horizon web client](client/README.md) includes a local OSC bridge for djay Pro. The [Maestro Cue plugin](plugin/README.md) is an Audio Unit for djay Pro. It sends red/green performance cues to Horizon.
+Early MVP development. The [Maestro web client](client/README.md) includes a local OSC bridge for djay Pro. The [Maestro Cue plugin](plugin/README.md) is an Audio Unit for djay Pro. It sends red/green performance cues to Maestro.
 
 ## Run the client
 
@@ -38,3 +38,7 @@ See the [plugin README](plugin/README.md) for installation and djay setup.
 
 - [Project description](docs/project-description.txt)
 - [djay Pro OSC specification v4](docs/djay-pro-osc-specification-v4.pdf)
+
+## Shared design and themes
+
+Both apps use the [Maestro design system](design/README.md), with shared brand assets and generated web/JUCE theme tokens. Use the header's **Light mode / Dark mode** button to switch appearance. Both default to dark and remember the selection. Node.js 18+ is also required when configuring the plugin to verify shared assets.

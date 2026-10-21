@@ -1,14 +1,15 @@
 import {parseTime,formatTime,writtenKey,beatPosition,chooseCrossfaderDeck} from './music.js';
+import {loadPreferences} from './preferences.js';
 const $=id=>document.getElementById(id);
 const audio=$('audio'),canvas=$('waveform'),ctx=canvas.getContext('2d');
-let saved={};try{saved=JSON.parse(localStorage.getItem('horizon-preferences')||'{}');}catch{}
+let saved={};try{saved=loadPreferences(localStorage);}catch{}
 const instruments=['alto','tenor','soprano','baritone','concert'];
 const state={source:'demo',title:'After the Rain',duration:272,position:96,playing:false,key:0,mode:'minor',bpm:120,grid:0,build:96,drop:112,horizon:saved.horizon===20?20:30,instrument:instruments.includes(saved.instrument)?saved.instrument:'alto',peaks:null,peakRate:200};
 const live={enabled:false,deck:saved.followedDeck===2?2:1,snapshot:null,received:0,connected:false,stale:true,values:{},prepared:null,attachment:null,rehearsal:null,identity:null,positionKnown:false};
 let objectURL=null,loadGeneration=0,loading=false,wakeLock=null,lastFrame=performance.now(),lastPaint=0,toastTimer,resizeWidth=0,resizeHeight=0;
 audio.volume=Number.isFinite(saved.volume)?Math.min(1,Math.max(0,saved.volume)):.7;
 $('volume').value=audio.volume;$('instrument').value=state.instrument;
-function persist(){try{localStorage.setItem('horizon-preferences',JSON.stringify({instrument:state.instrument,horizon:state.horizon,volume:audio.volume,followedDeck:live.deck}));}catch{}}
+function persist(){try{localStorage.setItem('maestro-preferences',JSON.stringify({instrument:state.instrument,horizon:state.horizon,volume:audio.volume,followedDeck:live.deck}));}catch{}}
 function notify(message){$('toast').textContent=message;$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,5000);}
 async function keepAwake(){if('wakeLock' in navigator&&state.playing&&!wakeLock&&document.visibilityState==='visible'){try{wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',()=>wakeLock=null);}catch{}}}
 function pause(){state.playing=false;audio.pause();if(wakeLock){wakeLock.release().catch(()=>{});wakeLock=null;}renderTransport();}
@@ -96,10 +97,11 @@ function drawWave(){
  ctx.clearRect(0,0,w,h);const wrap=canvas.parentElement;
  if(live.enabled&&(!state.peaks||live.stale||!live.positionKnown||live.values.loop!==0)){wrap.dataset.empty=live.stale?'Waiting for fresh djay data':!live.positionKnown?'Waiting for deck position':!state.peaks?'Live metadata connected · load and confirm matching audio for a waveform':live.values.loop===1?'Loop active · forward preview suspended':'Waiting for loop state';return;}
  delete wrap.dataset.empty;const mid=h/2,left=2,usable=w-4;
- ctx.lineWidth=1;ctx.strokeStyle='#2c3b3c';
+ const theme=getComputedStyle(document.documentElement),color=name=>theme.getPropertyValue('--'+name).trim();
+ ctx.lineWidth=1;ctx.strokeStyle=color('line');
  for(let sec=0;sec<=state.horizon;sec+=5){const x=left+sec/state.horizon*usable;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
  ctx.beginPath();ctx.moveTo(0,mid);ctx.lineTo(w,mid);ctx.stroke();
- if(state.position+state.horizon>state.duration){const endX=Math.max(0,(state.duration-state.position)/state.horizon*usable);ctx.fillStyle='#0b1113a0';ctx.fillRect(endX,0,w-endX,h);}
+ if(state.position+state.horizon>state.duration){const endX=Math.max(0,(state.duration-state.position)/state.horizon*usable);ctx.fillStyle=color('bg');ctx.fillRect(endX,0,w-endX,h);}
  const step=3;
  for(let x=left;x<w-2;x+=step){
   const t=state.position+(x-left)/usable*state.horizon;if(t>=state.duration)break;
@@ -107,10 +109,10 @@ function drawWave(){
   if(state.source==='demo')peak=demoPeak(t);
   else if(state.peaks){const from=Math.floor(t*state.peakRate),to=Math.min(state.peaks.length,Math.ceil((t+step/usable*state.horizon)*state.peakRate));for(let p=from;p<to;p++)peak=Math.max(peak,state.peaks[p]);}
   const amplitude=Math.max(.6,Math.min(1,peak)*h*.43);
-  ctx.fillStyle=state.drop!==null&&t>=state.drop?'#ffd08c':'#a3ecd0';ctx.fillRect(x,mid-amplitude,1.8,2*amplitude);
+  ctx.fillStyle=state.drop!==null&&t>=state.drop?color('amber'):color('accent');ctx.fillRect(x,mid-amplitude,1.8,2*amplitude);
  }
- if(state.drop!==null){const x=left+(state.drop-state.position)/state.horizon*usable;if(x>=left&&x<=w){ctx.save();ctx.strokeStyle='#ffd08c';ctx.lineWidth=1.5;ctx.setLineDash([4,5]);ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();ctx.restore();}}
- ctx.strokeStyle='#edf4ee';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(left,0);ctx.lineTo(left,h);ctx.stroke();
+ if(state.drop!==null){const x=left+(state.drop-state.position)/state.horizon*usable;if(x>=left&&x<=w){ctx.save();ctx.strokeStyle=color('amber');ctx.lineWidth=1.5;ctx.setLineDash([4,5]);ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();ctx.restore();}}
+ ctx.strokeStyle=color('ink');ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(left,0);ctx.lineTo(left,h);ctx.stroke();
 }
 new ResizeObserver(()=>{resizeWidth=canvas.clientWidth;resizeHeight=canvas.clientHeight;const ratio=Math.min(2,window.devicePixelRatio||1);canvas.width=Math.round(resizeWidth*ratio);canvas.height=Math.round(resizeHeight*ratio);ctx.setTransform(ratio,0,0,ratio,0,0);drawWave();}).observe(canvas);
 function frame(now){
@@ -271,7 +273,7 @@ function renderCue(){
  const cue=live.snapshot?.cue,fresh=live.connected&&cue&&live.snapshot.now-cue.updated<=3000,value=fresh?cue.state:'unknown';
  // A server started before cue support omits the field entirely; it must be restarted to receive cues.
  const outdated=live.connected&&live.snapshot&&!('cue' in live.snapshot);
- const detail=value==='green'?'The DJ is cueing you in':value==='red'?'Hold until the DJ cues you':outdated?'Horizon’s server is out of date. Restart it to receive cues.':'Waiting for the Maestro Cue plugin in djay';
+ const detail=value==='green'?'The DJ is cueing you in':value==='red'?'Hold until the DJ cues you':outdated?'Maestro’s server is out of date. Restart it to receive cues.':'Waiting for the Maestro Cue plugin in djay';
  $('performerCue').dataset.cue=value;
  $('cueLight').textContent=value==='green'?'GREEN · PLAY':value==='red'?'RED · HOLD':'NO CUE SIGNAL';
  if($('cueLightDetail').textContent!==detail)$('cueLightDetail').textContent=detail;
@@ -282,7 +284,7 @@ function startBridge(){
  events.onerror=()=>{live.connected=false;updateLive();renderCue();};
  setInterval(()=>{if(Date.now()-live.received>2500&&live.connected){live.connected=false;updateLive();renderCue();}},1000);
  $('followMode').addEventListener('change',e=>e.target.value==='live'?enterLive():leaveLive());
- $('refreshLive').addEventListener('click',async()=>{try{const response=await fetch('/api/refresh',{method:'POST'});if(!response.ok)throw Error();notify('State refresh requested. Check OSC sending in djay if no data arrives.');}catch{notify('The local bridge is unavailable. Restart Horizon’s server.');}});
+ $('refreshLive').addEventListener('click',async()=>{try{const response=await fetch('/api/refresh',{method:'POST'});if(!response.ok)throw Error();notify('State refresh requested. Check OSC sending in djay if no data arrives.');}catch{notify('The local bridge is unavailable. Restart Maestro’s server.');}});
  $('attachAudio').addEventListener('click',()=>{
   if(live.attachment){live.attachment=null;updateLive();return;}
   if(!live.enabled||!live.prepared||live.stale)return;
@@ -290,3 +292,8 @@ function startBridge(){
   live.attachment=live.identity;updateLive();notify('Audio matched by your confirmation. Browser playback stays silent.');
  });
 }
+
+const themeToggle=$('themeToggle');
+function renderThemeControl(){const light=document.documentElement.dataset.theme==='light';themeToggle.textContent=light?'Dark mode':'Light mode';themeToggle.setAttribute('aria-label',`Switch to ${light?'dark':'light'} mode`);}
+themeToggle.addEventListener('click',()=>{window.maestroTheme.set(document.documentElement.dataset.theme==='light'?'dark':'light');renderThemeControl();drawWave();});
+renderThemeControl();

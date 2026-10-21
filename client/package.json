@@ -1,12 +1,14 @@
 {
-  "name": "horizon-musician",
+  "name": "maestro-musician",
   "version": "1.0.0",
   "type": "module",
   "private": true,
   "scripts": {
     "start": "node server.mjs",
-    "check": "node --check app.js && node --check music.js && node --check server.mjs && node --check bridge.mjs && node --check osc.mjs",
-    "test": "node --test osc.test.mjs bridge.test.mjs"
+    "design:generate": "node ../design/generate.mjs",
+    "design:check": "node ../design/generate.mjs --check",
+    "check": "node ../design/generate.mjs --check && node --check theme.js && node --check preferences.js && node --check app.js && node --check music.js && node --check server.mjs && node --check bridge.mjs && node --check osc.mjs",
+    "test": "node --test osc.test.mjs bridge.test.mjs design.test.mjs"
   },
   "engines": {
     "node": ">=18"

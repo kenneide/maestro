@@ -12,7 +12,7 @@
         "<node_internals>/**"
       ],
       "serverReadyAction": {
-        "pattern": "Horizon is ready: (http://localhost:[0-9]+)",
+        "pattern": "Maestro is ready: (http://localhost:[0-9]+)",
         "uriFormat": "%s",
         "action": "openExternally"
       }
@@ -28,7 +28,7 @@
         "<node_internals>/**"
       ],
       "serverReadyAction": {
-        "pattern": "Horizon is ready: (http://localhost:[0-9]+)",
+        "pattern": "Maestro is ready: (http://localhost:[0-9]+)",
         "uriFormat": "%s",
         "action": "openExternally"
       },

@@ -1,6 +1,6 @@
 # Maestro Cue
 
-An Audio Unit effect for djay Pro that sends performance cues to the musician. The DJ flips a red/green light. The plugin sends it over OSC to the [Horizon client](../client/README.md), which shows it on stage. Audio passes through unchanged.
+An Audio Unit effect for djay Pro that sends performance cues to the musician. The DJ flips a red/green light. The plugin sends it over OSC to the [Maestro client](../client/README.md), which shows it on stage. Audio passes through unchanged.
 
 ## Build
 
@@ -39,7 +39,7 @@ The package is ad-hoc signed, not notarized. The recipient must open `Install Ma
 
 ## Use in djay Pro
 
-1. Start Horizon: `npm --prefix client start`.
+1. Start Maestro: `npm --prefix client start`.
 2. In djay Pro, open the audio FX / plugin slot and load **Kenneide: Maestro Cue**. Use the AU v2 or AUv3 version, whichever djay lists.
 3. Click the big button, or press Space while the plugin window has focus, to switch between **HOLD** (red) and **PLAY** (green).
 4. Optional: MIDI-map the plugin's **Cue** parameter to a controller button.
@@ -52,7 +52,7 @@ The standalone app also works as a sender without djay, which is useful for rehe
 | --- | --- | --- |
 | `/maestro/cue` | `s` `"red"` or `"green"` | On every change, and resent every second as a heartbeat |
 
-The destination is fixed at `127.0.0.1:9000` in this iteration. That is the same port djay's own OSC uses, and the Horizon bridge receives both. Horizon shows **NO CUE SIGNAL** when it has not received a heartbeat for 3 seconds.
+The destination is fixed at `127.0.0.1:9000` in this iteration. That is the same port djay's own OSC uses, and the Maestro bridge receives both. Maestro shows **NO CUE SIGNAL** when it has not received a heartbeat for 3 seconds.
 
 The plugin never sends cues from the audio thread. Parameter changes, including host automation, set a flag. A 30 Hz message-thread timer then sends the cue.
 
@@ -61,3 +61,7 @@ The plugin never sends cues from the audio thread. Parameter changes, including 
 - `CMakeLists.txt`: fetches JUCE and defines the AU, AUv3 and Standalone targets.
 - `Source/PluginProcessor.*`: the pass-through processor, the `Cue` parameter, and the OSC sender and heartbeat.
 - `Source/PluginEditor.*`: the red/green toggle UI.
+
+## Appearance
+
+The header theme button switches between dark and light modes and remembers the selection separately from DAW automation/state. Shared assets and token generation are documented in the [design system](../design/README.md). Node.js 18+ is required at CMake configuration time to check generated assets.

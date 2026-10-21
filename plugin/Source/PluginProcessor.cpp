@@ -46,7 +46,7 @@ bool MaestroCueProcessor::isBusesLayoutSupported (const BusesLayout& layouts) co
 void MaestroCueProcessor::timerCallback()
 {
     const auto now = juce::Time::getMillisecondCounter();
-    // Heartbeat resends the current cue so Horizon recovers from UDP loss or a restart.
+    // Heartbeat resends the current cue so Maestro recovers from UDP loss or a restart.
     if (dirty.exchange (false) || now - lastSendMs >= heartbeatMs)
         sendCue();
 }

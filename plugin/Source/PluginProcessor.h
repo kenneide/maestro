@@ -4,7 +4,7 @@
 #include <juce_osc/juce_osc.h>
 
 // Pass-through audio effect that broadcasts the DJ's performance cue
-// (red = hold, green = play) to the Horizon client as /maestro/cue over OSC.
+// (red = hold, green = play) to the Maestro client as /maestro/cue over OSC.
 class MaestroCueProcessor final : public juce::AudioProcessor,
                                   private juce::AudioProcessorValueTreeState::Listener,
                                   private juce::Timer
