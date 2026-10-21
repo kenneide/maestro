@@ -28,7 +28,10 @@ void MaestroCueEditor::Look::drawTextEditorOutline (juce::Graphics& g, int width
 
 juce::Font MaestroCueEditor::Look::getTextButtonFont (juce::TextButton& b, int)
 {
-    return juce::FontOptions (static_cast<float> (b.getComponentID() == "cue" ? 88 : MaestroDesign::type_body), juce::Font::bold);
+    // Match the web cue's Arial Bold with normal tracking; other controls keep the native font.
+    if (b.getComponentID() == "cue")
+        return juce::Font (juce::FontOptions ("Arial", 88.0f, juce::Font::bold)).withExtraKerningFactor (0.0f);
+    return juce::FontOptions (static_cast<float> (MaestroDesign::type_body), juce::Font::bold);
 }
 
 void MaestroCueEditor::IconButton::setIcon (const void* data, size_t size, juce::Colour colour)
@@ -82,7 +85,8 @@ MaestroCueEditor::MaestroCueEditor (MaestroCueProcessor& p)
     addAndMakeVisible (cueButton);
     // Shows where a Ready cue is heading; a child so it hides with the button.
     nextLabel.setJustificationType (juce::Justification::centred);
-    nextLabel.setFont (juce::FontOptions (static_cast<float> (MaestroDesign::type_heading), juce::Font::bold));
+    nextLabel.setFont (juce::Font (juce::FontOptions ("Arial", static_cast<float> (MaestroDesign::type_heading), juce::Font::bold))
+                          .withExtraKerningFactor (0.08f));
     nextLabel.setInterceptsMouseClicks (false, false);
     nextLabel.setAccessible (false);
     cueButton.addAndMakeVisible (nextLabel);

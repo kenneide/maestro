@@ -25,6 +25,8 @@ Use semantic color names rather than literals. `accent`/`onAccent` is the primar
 
 ## Theme selection
 
+Cue text uses Arial Bold in both interfaces, with normal letter spacing for Stop/Ready/Play. The uppercase Next subtitle adds tracking of 0.08em (0.08 of the font height in JUCE). This keeps cue letterforms and spacing consistent across the browser and native editor while allowing their display sizes to differ.
+
 Both interfaces start dark. Open the gear button for Settings; the sun/moon icon names the theme it will activate through its tooltip and accessibility title. `icons/settings.svg`, `icons/sun.svg`, and `icons/moon.svg` match the web app’s SVG shapes and are bundled into the plugin. The web remembers `maestro-theme` and applies it before first paint. Existing `horizon-preferences` and saxophone instrument selections migrate into the current preferences. Unavailable browser storage falls back safely.
 
 The plugin stores its selection in a JUCE PropertiesFile (`Maestro/Maestro.settings` under Application Support), separate from DAW state and automation. Editors sharing that file refresh their theme at 4Hz. Sandboxed hosts can isolate settings in their own containers. Plugin identifiers, audio behavior, OSC contract, and parameter IDs are unchanged.
