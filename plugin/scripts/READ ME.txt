@@ -32,6 +32,8 @@ Use
 - Click the big button, or press Space while the main cue view has focus,
   to advance: STOP (red) -> READY (amber, next Play) -> PLAY (green)
   -> READY (amber, next Stop) -> STOP.
+- Maestro also shows a scrolling waveform of the audio passing through
+  the plugin (usually djay's master mix).
 - To use a controller button, MIDI-map the plugin's "Cue" parameter in djay.
 - Maestro shows Stop, Ready (with what comes next) or Play. It shows "Stop" if it has heard
   nothing for 3 seconds.

@@ -68,6 +68,10 @@ If the Mac's Wi-Fi address changes, open the new address in Safari and add it to
 
 The [Maestro Cue plugin](../plugin/README.md) sends `/maestro/cue` with `"red"`, `"green"`, or `"amber"` followed by the state it is heading to (`"amber" "green"` or `"amber" "red"`) to the same receive port as djay. It resends the cue every second. Maestro shows **Play** in green, **Stop** in red, and **Ready** in amber with **Next: Play** or **Next: Stop** underneath, so musicians can prepare before the change. Missing or expired cues and bridge disconnections show **Stop**; cue connection details are available in **Debug**. Cue messages appear in the diagnostics message log but do not count as djay data.
 
+## Waveform
+
+The AUDIO section shows a waveform scrolling over about 8 seconds. It is drawn from `/maestro/wave` messages the Maestro Cue plugin sends: one `seq`, `min`, `max` point per 25 ms of audio. The plugin measures whatever djay routes through it, usually the master mix rather than the followed deck. Points are played out at a steady 25 ms per point, about 300 ms behind the newest one, so the strip scrolls smoothly even though updates arrive in batches. With no plugin, or no points for a second, it rests as a flat line. Waveform points are not added to the diagnostics message log; **Debug** shows how many have arrived. On very short landscape screens the waveform is hidden. With **Reduce motion** turned on, it updates in steps instead of animating.
+
 ## Musician settings
 
 Open **Settings** to choose your instrument key: **C**, **B♭**, **E♭**, or **F**. Written keys transpose concert pitch by 0, 2, 9, or 7 semitones respectively. Changes apply immediately and persist in this browser; existing saxophone preferences migrate automatically. The default is E♭. The followed deck also persists.

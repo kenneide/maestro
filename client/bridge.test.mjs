@@ -117,3 +117,29 @@ test('performer cue from the Maestro plugin is tracked without counting as djay 
   assert.equal(state.status,'waiting');
  }finally{bridge.close();sender.close();}
 });
+
+test('waveform bundles from the Maestro plugin fill an 8 second strip without flooding the message log',{timeout:10000},async()=>{
+ const sender=dgram.createSocket('udp4');
+ const bridge=createBridge({receivePort:0,requestHost:''});
+ const point=(seq,min,max)=>{const b=Buffer.alloc(12);b.writeInt32BE(seq);b.writeFloatBE(min,4);b.writeFloatBE(max,8);return Buffer.concat([str('/maestro/wave'),str(',iff'),b]);};
+ const bundle=(...messages)=>Buffer.concat([str('#bundle'),Buffer.alloc(8),...messages.flatMap(m=>{const size=Buffer.alloc(4);size.writeInt32BE(m.length);return [size,m];})]);
+ try{
+  await until(()=>bridge.snapshot().ready);
+  const {receivePort}=bridge.snapshot();
+  await send(sender,bundle(point(10,-.5,.25),point(11,-2,2)),receivePort);
+  await until(()=>bridge.snapshot().wave.points.length===2);
+  assert.deepEqual(bridge.snapshot().wave.points,[[10,-.5,.25],[11,-1,1]]);
+  await send(sender,Buffer.concat([str('/maestro/wave'),str(',sff'),str('x'),Buffer.alloc(8)]),receivePort);
+  for(let seq=12;seq<12+400;seq+=50)await send(sender,bundle(...Array.from({length:50},(_,i)=>point(seq+i,0,0))),receivePort);
+  await until(()=>bridge.snapshot().waveMessages===403);
+  const state=bridge.snapshot();
+  assert.equal(state.wave.points.length,80,'regular updates carry the last 2 s');
+  assert.equal(state.wave.points.at(-1)[0],411);
+  assert.equal(bridge.snapshot({waveSeconds:8}).wave.points.length,320);
+  assert.equal(state.recentMessages.length,0);
+  assert.equal(state.packets,0);
+  await send(sender,point(3,0,.1),receivePort);
+  await until(()=>bridge.snapshot().wave.points.length===1);
+  assert.equal(bridge.snapshot().wave.points[0][0],3,'seq restart begins a fresh strip');
+ }finally{bridge.close();sender.close();}
+});

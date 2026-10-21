@@ -1,5 +1,6 @@
 import {formatTime,writtenKey,deckMusic,chooseCrossfaderDeck} from './music.js';
 import {loadPreferences} from './preferences.js';
+import {mergeWave,createPlayout,advancePlayout,waveSpan} from './wave.js';
 const $=id=>document.getElementById(id);
 let saved={};try{saved=loadPreferences(localStorage);}catch{}
 const state={instrument:saved.instrument||'Eb',title:'Waiting for djay',key:null,mode:'major',bpm:null,position:null,duration:null,playing:false};
@@ -66,7 +67,7 @@ $('instrument').addEventListener('change',e=>{state.instrument=e.target.value;pe
 async function fullscreen(){try{if(document.fullscreenElement)await document.exitFullscreen();else if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();else notify('Use your browser’s View menu to enter full screen.');}catch{notify('Use your browser’s View menu to enter full screen.');}}
 if(navigator.standalone||matchMedia('(display-mode: standalone)').matches)$('fullscreen').hidden=true;$('fullscreen').addEventListener('click',fullscreen);document.addEventListener('fullscreenchange',()=>{$('fullscreen').setAttribute('aria-label',document.fullscreenElement?'Exit full screen':'Enter full screen');});
 document.addEventListener('keydown',e=>{if(e.altKey||e.ctrlKey||e.metaKey||$('settings').open||['INPUT','SELECT','TEXTAREA','BUTTON','SUMMARY'].includes(e.target.tagName))return;if(e.key.toLowerCase()==='f')fullscreen();});
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){updateLive();renderCue();}else keepAwake();});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){updateLive();renderCue();renderWave();}else keepAwake();});
 function renderMessageLog(){
  if(!$('debugDetails').open||!$('messageDetails').open)return;
  const messages=live.snapshot?.recentMessages||[];
@@ -131,15 +132,44 @@ function renderCue(){
  $('cueLight').textContent=value==='green'?'Play':value==='amber'?'Ready':'Stop';
  $('cueNext').textContent=value==='amber'?`Next: ${toPlay?'Play':'Stop'}`:'';
  if($('cueDiagnostic').textContent!==detail)$('cueDiagnostic').textContent=detail;
+ const waveDetail=live.snapshot?.wave?.updated?`Waveform: ${live.snapshot.waveMessages} points received`:'Waveform: waiting for the Maestro Cue plugin';
+ if($('waveDiagnostic').textContent!==waveDetail)$('waveDiagnostic').textContent=waveDetail;
 }
+const waveCanvas=$('waveform'),waveContext=waveCanvas.getContext?.('2d');
+const wave={points:[],clock:createPlayout(),frame:0,colour:'',idle:''};
+const reducedMotion=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+function waveFresh(){const updated=live.snapshot?.wave?.updated;return live.connected&&Boolean(updated)&&wave.points.length>0&&live.snapshot.now-updated+Date.now()-live.received<=1000;}
+function readWaveColours(){const style=getComputedStyle(document.documentElement);wave.colour=style.getPropertyValue('--accent').trim();wave.idle=style.getPropertyValue('--line').trim();}
+function sizeWave(){const box=waveCanvas.getBoundingClientRect(),scale=window.devicePixelRatio||1;waveCanvas.width=Math.round(box.width*scale);waveCanvas.height=Math.round(box.height*scale);readWaveColours();drawWave(performance.now());}
+function drawWave(now){
+ const {width,height}=waveCanvas,mid=height/2;
+ waveContext.clearRect(0,0,width,height);
+ if(!width||!height)return;
+ if(!waveFresh()){waveContext.fillStyle=wave.idle;waveContext.fillRect(0,Math.floor(mid),width,Math.max(1,Math.round(window.devicePixelRatio||1)));return;}
+ // Newest point enters on the right; x is time, so the strip slides smoothly between arrivals.
+ const pos=advancePlayout(wave.clock,wave.points.at(-1)[0],now),start=pos-waveSpan,step=width/waveSpan;
+ const visible=wave.points.filter(([seq])=>seq>=start-1&&seq<=pos+1);
+ if(visible.length<2)return;
+ const x=seq=>(seq-start)*step,y=value=>mid-value*mid*.95;
+ waveContext.beginPath();
+ visible.forEach(([seq,,max],i)=>i?waveContext.lineTo(x(seq),y(max)):waveContext.moveTo(x(seq),y(max)));
+ for(let i=visible.length-1;i>=0;i--)waveContext.lineTo(x(visible[i][0]),y(Math.min(visible[i][1],visible[i][2]-1/mid)));
+ waveContext.closePath();
+ const fade=waveContext.createLinearGradient(0,0,width*.2,0);fade.addColorStop(0,'transparent');fade.addColorStop(1,wave.colour);
+ waveContext.fillStyle=fade;waveContext.fill();
+}
+function waveLoop(now){wave.frame=0;drawWave(now);if(waveFresh()&&document.visibilityState==='visible')wave.frame=requestAnimationFrame(waveLoop);}
+// Reduced motion: redraw only when data arrives instead of animating every frame.
+function renderWave(){if(!waveContext||wave.frame)return;if(reducedMotion()||document.visibilityState!=='visible')drawWave(performance.now());else wave.frame=requestAnimationFrame(waveLoop);}
+if(waveContext){if(typeof ResizeObserver==='function')new ResizeObserver(sizeWave).observe(waveCanvas);sizeWave();}
 function startBridge(){
  const events=new EventSource('/api/events');
- events.onmessage=event=>{try{const data=JSON.parse(event.data);if(!Array.isArray(data.decks)||data.decks.length!==4)return;live.snapshot=data;live.received=Date.now();live.connected=true;updateLive();renderCue();}catch{}};
- events.onerror=()=>{live.connected=false;updateLive();renderCue();};
- setInterval(()=>{if(Date.now()-live.received>2500&&live.connected)live.connected=false;updateLive();renderCue();},1000);
+ events.onmessage=event=>{try{const data=JSON.parse(event.data);if(!Array.isArray(data.decks)||data.decks.length!==4)return;live.snapshot=data;live.received=Date.now();live.connected=true;wave.points=mergeWave(wave.points,data.wave?.points||[]);updateLive();renderCue();renderWave();}catch{}};
+ events.onerror=()=>{live.connected=false;updateLive();renderCue();renderWave();};
+ setInterval(()=>{if(Date.now()-live.received>2500&&live.connected)live.connected=false;updateLive();renderCue();renderWave();},1000);
  $('refreshLive').addEventListener('click',async()=>{try{const response=await fetch('/api/refresh',{method:'POST'});if(!response.ok)throw Error();notify('State refresh requested. Check OSC sending in djay if no data arrives.');}catch{notify('The local bridge is unavailable. Restart Maestro’s server.');}});
 }
 const themeToggle=$('themeToggle');
 function renderThemeControl(){const light=document.documentElement.dataset.theme==='light';themeToggle.setAttribute('aria-label',`Switch to ${light?'dark':'light'} mode`);themeToggle.setAttribute('title',`Switch to ${light?'dark':'light'} mode`);}
-themeToggle.addEventListener('click',()=>{window.maestroTheme.set(document.documentElement.dataset.theme==='light'?'dark':'light');renderThemeControl();});
+themeToggle.addEventListener('click',()=>{window.maestroTheme.set(document.documentElement.dataset.theme==='light'?'dark':'light');renderThemeControl();if(waveContext){readWaveColours();drawWave(performance.now());}});
 renderThemeControl();updateLive();renderCue();startBridge();

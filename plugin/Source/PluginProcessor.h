@@ -8,6 +8,8 @@
 // Pass-through audio effect that broadcasts the DJ's performance cue to the Maestro
 // client as /maestro/cue over OSC: "red" (Stop), "green" (Play), or "amber" plus the
 // state it is heading to (Ready). The DJ cycles Stop -> Ready -> Play -> Ready -> Stop.
+// It also sends the mono signal's envelope as /maestro/wave (seq, min, max) once per
+// 25 ms window so Maestro can draw a scrolling waveform.
 class MaestroCueProcessor final : public juce::AudioProcessor,
                                   private juce::AudioProcessorValueTreeState::Listener,
                                   private juce::Timer
@@ -20,6 +22,13 @@ public:
     static constexpr const char* defaultHost = "127.0.0.1";
     static constexpr int defaultPort = 9000;
     static constexpr int defaultWebPort = MusicianLink::defaultWebPort;
+    static constexpr double waveWindowSeconds = 0.025;
+
+    struct WavePoint
+    {
+        int seq = 0;
+        float min = 0.0f, max = 0.0f;
+    };
 
     struct Destination
     {
@@ -31,10 +40,11 @@ public:
     explicit MaestroCueProcessor (const juce::PropertiesFile::Options& = maestroPreferenceOptions());
     ~MaestroCueProcessor() override;
 
-    void prepareToPlay (double, int) override {}
+    void prepareToPlay (double sampleRate, int) override;
     void releaseResources() override {}
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
-    void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override {}
+    // Leaves audio untouched; measures the envelope for /maestro/wave.
+    void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
     using AudioProcessor::processBlock;
 
     juce::AudioProcessorEditor* createEditor() override;
@@ -69,6 +79,9 @@ public:
     bool setDestination (const juce::String& host, int port) { return setDestination (host, port, getDestination().webPort); }
     static bool isValidDestination (const juce::String& host, int port);
 
+    // Message thread: takes up to maxPoints completed windows, oldest first.
+    int drainWave (WavePoint* out, int maxPoints);
+
 private:
     static juce::AudioProcessorValueTreeState::ParameterLayout createLayout();
 
@@ -76,6 +89,7 @@ private:
     void parameterChanged (const juce::String&, float) override { dirty = true; }
     void timerCallback() override;
     void sendCue();
+    void sendWave();
     void storeDestination (const Destination&);
 
     juce::AudioProcessorValueTreeState state;
@@ -91,6 +105,13 @@ private:
     std::atomic<bool> dirty { true };
     std::atomic<bool> connected { false };
     juce::uint32 lastSendMs = 0;
+
+    // Audio thread writes completed windows; the message thread drains them.
+    static constexpr int waveCapacity = 256;
+    juce::AbstractFifo waveFifo { waveCapacity };
+    std::array<WavePoint, waveCapacity> waveBuffer;
+    int windowSamples = 1200, windowCount = 0, waveSeq = 0;
+    float windowMin = 0.0f, windowMax = 0.0f;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MaestroCueProcessor)
 };

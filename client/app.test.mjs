@@ -4,17 +4,21 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import {formatTime,writtenKey,deckMusic,chooseCrossfaderDeck} from './music.js';
 import {loadPreferences} from './preferences.js';
+import {mergeWave,createPlayout,advancePlayout,waveSpan} from './wave.js';
 
 function createClient(){
  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
  const elements=new Map([...html.matchAll(/id="([^"]+)"/g)].map(([,id])=>[id,{textContent:'',value:'',dataset:{},listeners:{},children:[],parentElement:{dataset:{}},classList:{toggle(){}},addEventListener(type,fn){this.listeners[type]=fn;},setAttribute(name,value){(this.attributes??={})[name]=value;},removeAttribute(name){delete this.attributes?.[name];},focus(){},showModal(){this.open=true;},close(){this.open=false;}}]));
  elements.get('beatDots').children=Array.from({length:4},()=>({classList:{toggle(){}}}));
+ const drawing={fills:0,idle:0},frames=[];
+ Object.assign(elements.get('waveform'),{width:0,height:0,getBoundingClientRect:()=>({width:320,height:48}),getContext:()=>({clearRect(){},beginPath(){},moveTo(){},lineTo(){},closePath(){},fill(){drawing.fills++;},fillRect(){drawing.idle++;},createLinearGradient:()=>({addColorStop(){}})})});
  const storage=new Map();let events,timer,now=10000;
  const document={getElementById:id=>{assert.ok(elements.has(id),`Missing element ${id}`);return elements.get(id);},documentElement:{dataset:{}},visibilityState:'visible',addEventListener(){}};
- const context={document,window:{maestroTheme:{set(theme){document.documentElement.dataset.theme=theme;}}},navigator:{},localStorage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)},matchMedia:()=>({matches:false}),EventSource:class{constructor(){events=this;}},setInterval(fn){timer=fn;},setTimeout(){},clearTimeout(){},Date:class extends Date{static now(){return now;}},formatTime,writtenKey,deckMusic,chooseCrossfaderDeck,loadPreferences};
+ const context={document,window:{devicePixelRatio:2,maestroTheme:{set(theme){document.documentElement.dataset.theme=theme;}}},navigator:{},localStorage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)},matchMedia:()=>({matches:false}),EventSource:class{constructor(){events=this;}},setInterval(fn){timer=fn;},setTimeout(){},clearTimeout(){},Date:class extends Date{static now(){return now;}},performance:{now:()=>now},requestAnimationFrame:fn=>frames.push(fn),getComputedStyle:()=>({getPropertyValue:()=>'#888888'}),mergeWave,createPlayout,advancePlayout,waveSpan,formatTime,writtenKey,deckMusic,chooseCrossfaderDeck,loadPreferences};
  const script=readFileSync(new URL('./app.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
  vm.runInNewContext(script,context);
- return {get:id=>elements.get(id),storage,document,get now(){return now;},
+ return {get:id=>elements.get(id),storage,document,drawing,get now(){return now;},
+  frame(){const pending=frames.splice(0);for(const fn of pending)fn(now);return pending.length;},
   send(snapshot){events.onmessage({data:JSON.stringify(snapshot)});},
   advance(ms){now+=ms;timer();},disconnect(){events.onerror();}};
 }
@@ -109,4 +113,19 @@ test('other deck omits absent metadata and stale status, clears on unload or dis
  client.disconnect();assert.equal(get('otherDeck').hidden,true);
  send();assert.equal(get('otherDeck').hidden,false);
  client.advance(2600);assert.equal(get('otherDeck').hidden,true);
+});
+
+test('waveform scrolls while plugin points are fresh and rests on a flat line when they stop',()=>{
+ const client=createClient(),{get,drawing}=client;
+ assert.equal(get('waveform').width,640,'canvas sized for device pixels');
+ assert.ok(drawing.idle>0,'idle line before any points');
+ const deck={values:{loaded:1,title:'First',time:30},updated:{time:client.now}};
+ const snapshot=now=>({now,status:'receiving',decks:[deck,deck,deck,deck],mixer:{crossfader:0},cue:null,addresses:[],recentMessages:[],waveMessages:80,wave:{updated:now,points:Array.from({length:80},(_,i)=>[i,-.5,.5])}});
+ client.send(snapshot(client.now));
+ assert.equal(client.frame(),1);assert.ok(drawing.fills>0,'waveform drawn');
+ assert.match(get('waveDiagnostic').textContent,/80 points/);
+ assert.equal(client.frame(),1,'keeps animating while fresh');
+ const idle=drawing.idle;client.advance(1500);
+ assert.equal(client.frame(),1);assert.ok(drawing.idle>idle,'flat line once stale');
+ assert.equal(client.frame(),0,'animation stops when stale');
 });

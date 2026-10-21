@@ -53,6 +53,7 @@ The standalone app also works as a sender without djay, which is useful for rehe
 | Address | Args | Sent |
 | --- | --- | --- |
 | `/maestro/cue` | `s` `"red"` (Stop) or `"green"` (Play); `ss` `"amber"` plus `"green"` or `"red"` (Ready, heading to Play or Stop) | On every change, and resent every second as a heartbeat |
+| `/maestro/wave` | `i` `seq`, `f` `min`, `f` `max`: lowest and highest sample of the mono mix in one 25 ms window, from -1 to 1. `seq` counts windows, so gaps stay in time | Each window, batched into one OSC bundle per 30 Hz tick |
 
 Open the gear button for **Settings → CONNECTION**: enter the IP address (or hostname, such as `studio-mac.local`) and the **OSC PORT** of the computer running Maestro. **WEB PORT** is the musician app’s HTTP port (default **4173**), separate from the OSC port. Press **Apply** or Return to save all three values together. The default is `127.0.0.1:9000`, the same computer and the same port djay's own OSC uses; the Maestro bridge receives both. Each plugin instance saves its destination and web port with the djay session; older sessions use web port 4173. The last connection settings applied become the default for new instances. Invalid edits leave the applied settings and QR link unchanged. The footer shows **Sending to** or **Send failed** for the current destination. The musician app shows **Stop** when its cue heartbeat expires or the bridge disconnects.
 

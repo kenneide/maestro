@@ -74,6 +74,23 @@ void testState (const juce::PropertiesFile::Options& options)
     juce::AudioProcessor::copyXmlToBinary (*malformedXml, data);
     restored.setStateInformation (data.getData(), static_cast<int> (data.getSize()));
     require (restored.getDestination().webPort == 4173, "Invalid stored web port falls back");
+    processor.prepareToPlay (48000.0, 512);
+    juce::AudioBuffer<float> sine (2, 512);
+    for (int block = 0; block < 8; ++block)
+    {
+        for (int c = 0; c < 2; ++c)
+            for (int i = 0; i < 512; ++i)
+                sine.setSample (c, i, 0.5f * std::sin (juce::MathConstants<float>::twoPi * 440.0f * static_cast<float> (block * 512 + i) / 48000.0f));
+        juce::MidiBuffer none;
+        processor.processBlock (sine, none);
+    }
+    MaestroCueProcessor::WavePoint points[16];
+    const auto count = processor.drainWave (points, 16);
+    require (count == 8 * 512 / 1200, "One wave point per 25 ms window");
+    for (int i = 0; i < count; ++i)
+        require (points[i].seq == i && points[i].min < -0.49f && points[i].min >= -0.5f
+                 && points[i].max > 0.49f && points[i].max <= 0.5f, "Wave envelope tracks mono min and max");
+    require (processor.drainWave (points, 16) == 0, "Drained wave points are consumed");
     juce::AudioBuffer<float> audio (2, 64);
     for (int c = 0; c < 2; ++c) for (int i = 0; i < 64; ++i) audio.setSample (c, i, static_cast<float> (i + c) / 64.0f);
     const juce::AudioBuffer<float> original (audio);
@@ -112,7 +129,7 @@ int main (int argc, char* argv[])
         testState (options);
         if (argc > 1) writeQrFixture (juce::File (argv[1]));
         temporary.deleteRecursively();
-        std::cout << "PASS: musician links, interface selection, validation, state compatibility, cue labels and audio passthrough\n";
+        std::cout << "PASS: musician links, interface selection, validation, state compatibility, cue labels, wave envelope and audio passthrough\n";
         return 0;
     }
     catch (const std::exception& error)

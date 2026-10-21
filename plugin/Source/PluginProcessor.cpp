@@ -51,6 +51,43 @@ juce::AudioProcessorValueTreeState::ParameterLayout MaestroCueProcessor::createL
     return layout;
 }
 
+void MaestroCueProcessor::prepareToPlay (double sampleRate, int)
+{
+    windowSamples = juce::jmax (1, juce::roundToInt (sampleRate * waveWindowSeconds));
+    windowCount = 0;
+    windowMin = windowMax = 0.0f;
+}
+
+void MaestroCueProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer&)
+{
+    const auto channels = buffer.getNumChannels();
+    if (channels == 0) return;
+    const auto scale = 1.0f / static_cast<float> (channels);
+    for (int i = 0; i < buffer.getNumSamples(); ++i)
+    {
+        float mono = 0.0f;
+        for (int c = 0; c < channels; ++c) mono += buffer.getSample (c, i);
+        mono *= scale;
+        windowMin = windowCount == 0 ? mono : juce::jmin (windowMin, mono);
+        windowMax = windowCount == 0 ? mono : juce::jmax (windowMax, mono);
+        if (++windowCount < windowSamples) continue;
+        // A full FIFO drops the window; seq still advances so the gap stays in time.
+        const auto scope = waveFifo.write (1);
+        if (scope.blockSize1 > 0)
+            waveBuffer[static_cast<size_t> (scope.startIndex1)] = { waveSeq, juce::jlimit (-1.0f, 1.0f, windowMin), juce::jlimit (-1.0f, 1.0f, windowMax) };
+        waveSeq = waveSeq == std::numeric_limits<int>::max() ? 0 : waveSeq + 1;
+        windowCount = 0;
+    }
+}
+
+int MaestroCueProcessor::drainWave (WavePoint* out, int maxPoints)
+{
+    const auto scope = waveFifo.read (juce::jmin (maxPoints, waveFifo.getNumReady()));
+    int n = 0;
+    scope.forEach ([&] (int index) { out[n++] = waveBuffer[static_cast<size_t> (index)]; });
+    return n;
+}
+
 bool MaestroCueProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
     const auto& out = layouts.getMainOutputChannelSet();
@@ -65,6 +102,7 @@ void MaestroCueProcessor::timerCallback()
     // Heartbeat resends the current cue so Maestro recovers from UDP loss or a restart.
     if (dirty.exchange (false) || now - lastSendMs >= heartbeatMs)
         sendCue();
+    sendWave();
 }
 
 void MaestroCueProcessor::sendCue()
@@ -78,6 +116,18 @@ void MaestroCueProcessor::sendCue()
     if (ready)
         message.addString (cue == Cue::readyToPlay ? "green" : "red");
     connected = sender.sendToIPAddress (target.host, target.port, message);
+}
+
+void MaestroCueProcessor::sendWave()
+{
+    std::array<WavePoint, waveCapacity> points;
+    const auto count = drainWave (points.data(), waveCapacity);
+    if (count == 0) return;
+    juce::OSCBundle bundle;
+    for (const auto& point : juce::Span (points.data(), static_cast<size_t> (count)))
+        bundle.addElement (juce::OSCMessage ("/maestro/wave", point.seq, point.min, point.max));
+    const auto target = getDestination();
+    sender.sendToIPAddress (target.host, target.port, bundle);
 }
 
 void MaestroCueProcessor::advanceCue()

@@ -7,8 +7,8 @@
     "start": "node server.mjs",
     "design:generate": "node ../design/generate.mjs",
     "design:check": "node ../design/generate.mjs --check",
-    "check": "node ../design/generate.mjs --check && node --check theme.js && node --check preferences.js && node --check app.js && node --check music.js && node --check server.mjs && node --check bridge.mjs && node --check osc.mjs && node --check hosts.mjs",
-    "test": "node --test app.test.mjs music.test.mjs osc.test.mjs bridge.test.mjs design.test.mjs hosts.test.mjs",
+    "check": "node ../design/generate.mjs --check && node --check theme.js && node --check preferences.js && node --check app.js && node --check music.js && node --check wave.js && node --check server.mjs && node --check bridge.mjs && node --check osc.mjs && node --check hosts.mjs",
+    "test": "node --test app.test.mjs music.test.mjs wave.test.mjs osc.test.mjs bridge.test.mjs design.test.mjs hosts.test.mjs",
     "start:lan": "OSC_HOST=0.0.0.0 HTTP_HOST=0.0.0.0 DJAY_HOST= node server.mjs"
   },
   "engines": {
