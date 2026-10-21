@@ -269,10 +269,12 @@ function renderLiveLabels(){
 }
 function renderCue(){
  const cue=live.snapshot?.cue,fresh=live.connected&&cue&&live.snapshot.now-cue.updated<=3000,value=fresh?cue.state:'unknown';
- if($('performerCue').dataset.cue===value)return;
+ // A server started before cue support omits the field entirely; it must be restarted to receive cues.
+ const outdated=live.connected&&live.snapshot&&!('cue' in live.snapshot);
+ const detail=value==='green'?'The DJ is cueing you in':value==='red'?'Hold until the DJ cues you':outdated?'Horizon’s server is out of date. Restart it to receive cues.':'Waiting for the Maestro Cue plugin in djay';
  $('performerCue').dataset.cue=value;
  $('cueLight').textContent=value==='green'?'GREEN · PLAY':value==='red'?'RED · HOLD':'NO CUE SIGNAL';
- $('cueLightDetail').textContent=value==='green'?'The DJ is cueing you in':value==='red'?'Hold until the DJ cues you':'Waiting for the Maestro Cue plugin in djay';
+ if($('cueLightDetail').textContent!==detail)$('cueLightDetail').textContent=detail;
 }
 function startBridge(){
  const events=new EventSource('/api/events');
