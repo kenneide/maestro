@@ -17,6 +17,7 @@ test('shared theme text, cue, border and focus contrast',()=>{
    assert.ok(contrast(p[fg],mixed)>=4.5,`${fg} on tinted ${bg}`);
   }
   assert.ok(contrast(p.onAccent,p.accent)>=4.5);
+  for(const fill of ['cueRedFill','cueAmberFill','cueGreenFill'])assert.ok(contrast(p.cueOnFill,p[fill])>=4.5,`cueOnFill on ${fill}`);
   for(const bg of ['bg','surface'])for(const fg of ['line','focus'])assert.ok(contrast(p[fg],p[bg])>=3,`${fg} on ${bg}`);
  }
 });

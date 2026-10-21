@@ -3,11 +3,13 @@ import {loadPreferences} from './preferences.js';
 import {mergeWave,createPlayout,advancePlayout,waveSpan} from './wave.js';
 const $=id=>document.getElementById(id);
 let saved={};try{saved=loadPreferences(localStorage);}catch{}
-const state={instrument:saved.instrument||'Eb',title:'Waiting for djay',key:null,mode:'major',bpm:null,position:null,duration:null,playing:false};
+const state={instrument:saved.instrument||'Eb',trafficLight:saved.trafficLight===true,title:'Waiting for djay',key:null,mode:'major',bpm:null,position:null,duration:null,playing:false};
 const live={deck:saved.followedDeck===2?2:1,snapshot:null,received:0,connected:false,stale:true,values:{},positionKnown:false};
 let toastTimer,wakeLock=null,wakePending=false;
 $('instrument').value=state.instrument;
-function persist(){try{localStorage.setItem('maestro-preferences',JSON.stringify({instrument:state.instrument,followedDeck:live.deck}));}catch{}}
+function persist(){try{localStorage.setItem('maestro-preferences',JSON.stringify({instrument:state.instrument,followedDeck:live.deck,trafficLight:state.trafficLight}));}catch{}}
+// Traffic light mode hides everything but the cue, which fills the screen in its colour.
+function renderMode(){document.documentElement.dataset.mode=state.trafficLight?'traffic':'full';$('trafficLight').checked=state.trafficLight;}
 function notify(message){$('toast').textContent=message;$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,5000);}
 async function keepAwake(){
  const active=state.playing&&document.visibilityState==='visible';
@@ -64,6 +66,7 @@ function renderOtherDeck(){
 $('settingsButton').addEventListener('click',()=>$('settings').showModal());
 $('closeSettings').addEventListener('click',()=>$('settings').close());
 $('instrument').addEventListener('change',e=>{state.instrument=e.target.value;persist();renderStatic();});
+$('trafficLight').addEventListener('change',e=>{state.trafficLight=e.target.checked;persist();renderMode();renderWave();});
 async function fullscreen(){try{if(document.fullscreenElement)await document.exitFullscreen();else if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();else notify('Use your browser’s View menu to enter full screen.');}catch{notify('Use your browser’s View menu to enter full screen.');}}
 if(navigator.standalone||matchMedia('(display-mode: standalone)').matches)$('fullscreen').hidden=true;$('fullscreen').addEventListener('click',fullscreen);document.addEventListener('fullscreenchange',()=>{$('fullscreen').setAttribute('aria-label',document.fullscreenElement?'Exit full screen':'Enter full screen');});
 document.addEventListener('keydown',e=>{if(e.altKey||e.ctrlKey||e.metaKey||$('settings').open||['INPUT','SELECT','TEXTAREA','BUTTON','SUMMARY'].includes(e.target.tagName))return;if(e.key.toLowerCase()==='f')fullscreen();});
@@ -160,7 +163,7 @@ function drawWave(now){
 }
 function waveLoop(now){wave.frame=0;drawWave(now);if(waveFresh()&&document.visibilityState==='visible')wave.frame=requestAnimationFrame(waveLoop);}
 // Reduced motion: redraw only when data arrives instead of animating every frame.
-function renderWave(){if(!waveContext||wave.frame)return;if(reducedMotion()||document.visibilityState!=='visible')drawWave(performance.now());else wave.frame=requestAnimationFrame(waveLoop);}
+function renderWave(){if(!waveContext||wave.frame||state.trafficLight)return;if(reducedMotion()||document.visibilityState!=='visible')drawWave(performance.now());else wave.frame=requestAnimationFrame(waveLoop);}
 if(waveContext){if(typeof ResizeObserver==='function')new ResizeObserver(sizeWave).observe(waveCanvas);sizeWave();}
 function startBridge(){
  const events=new EventSource('/api/events');
@@ -172,4 +175,4 @@ function startBridge(){
 const themeToggle=$('themeToggle');
 function renderThemeControl(){const light=document.documentElement.dataset.theme==='light';themeToggle.setAttribute('aria-label',`Switch to ${light?'dark':'light'} mode`);themeToggle.setAttribute('title',`Switch to ${light?'dark':'light'} mode`);}
 themeToggle.addEventListener('click',()=>{window.maestroTheme.set(document.documentElement.dataset.theme==='light'?'dark':'light');renderThemeControl();if(waveContext){readWaveColours();drawWave(performance.now());}});
-renderThemeControl();updateLive();renderCue();startBridge();
+renderThemeControl();renderMode();updateLive();renderCue();startBridge();

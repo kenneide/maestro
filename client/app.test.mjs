@@ -6,13 +6,13 @@ import {formatTime,writtenKey,deckMusic,chooseCrossfaderDeck} from './music.js';
 import {loadPreferences} from './preferences.js';
 import {mergeWave,createPlayout,advancePlayout,waveSpan} from './wave.js';
 
-function createClient(){
+function createClient(storage=new Map()){
  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
  const elements=new Map([...html.matchAll(/id="([^"]+)"/g)].map(([,id])=>[id,{textContent:'',value:'',dataset:{},listeners:{},children:[],parentElement:{dataset:{}},classList:{toggle(){}},addEventListener(type,fn){this.listeners[type]=fn;},setAttribute(name,value){(this.attributes??={})[name]=value;},removeAttribute(name){delete this.attributes?.[name];},focus(){},showModal(){this.open=true;},close(){this.open=false;}}]));
  elements.get('beatDots').children=Array.from({length:4},()=>({classList:{toggle(){}}}));
  const drawing={fills:0,idle:0},frames=[];
  Object.assign(elements.get('waveform'),{width:0,height:0,getBoundingClientRect:()=>({width:320,height:48}),getContext:()=>({clearRect(){},beginPath(){},moveTo(){},lineTo(){},closePath(){},fill(){drawing.fills++;},fillRect(){drawing.idle++;},createLinearGradient:()=>({addColorStop(){}})})});
- const storage=new Map();let events,timer,now=10000;
+ let events,timer,now=10000;
  const document={getElementById:id=>{assert.ok(elements.has(id),`Missing element ${id}`);return elements.get(id);},documentElement:{dataset:{}},visibilityState:'visible',addEventListener(){}};
  const context={document,window:{devicePixelRatio:2,maestroTheme:{set(theme){document.documentElement.dataset.theme=theme;}}},navigator:{},localStorage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)},matchMedia:()=>({matches:false}),EventSource:class{constructor(){events=this;}},setInterval(fn){timer=fn;},setTimeout(){},clearTimeout(){},Date:class extends Date{static now(){return now;}},performance:{now:()=>now},requestAnimationFrame:fn=>frames.push(fn),getComputedStyle:()=>({getPropertyValue:()=>'#888888'}),mergeWave,createPlayout,advancePlayout,waveSpan,formatTime,writtenKey,deckMusic,chooseCrossfaderDeck,loadPreferences};
  const script=readFileSync(new URL('./app.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
@@ -128,4 +128,19 @@ test('waveform scrolls while plugin points are fresh and rests on a flat line wh
  const idle=drawing.idle;client.advance(1500);
  assert.equal(client.frame(),1);assert.ok(drawing.idle>idle,'flat line once stale');
  assert.equal(client.frame(),0,'animation stops when stale');
+});
+
+test('traffic light mode toggles from settings, persists, and still follows cues',()=>{
+ const client=createClient(),{get,storage,document}=client;
+ assert.equal(document.documentElement.dataset.mode,'full');assert.equal(get('trafficLight').checked,false);
+ get('settingsButton').listeners.click();
+ get('trafficLight').listeners.change({target:{checked:true}});
+ assert.equal(document.documentElement.dataset.mode,'traffic');assert.equal(JSON.parse(storage.get('maestro-preferences')).trafficLight,true);
+ const restored=createClient(storage);
+ assert.equal(restored.document.documentElement.dataset.mode,'traffic');assert.equal(restored.get('trafficLight').checked,true);
+ const snapshot={now:restored.now,status:'receiving',decks:[{},{},{},{}],mixer:{crossfader:0},cue:{state:'amber',next:'green',updated:restored.now},addresses:[]};
+ restored.send(snapshot);assert.equal(restored.get('cueLight').textContent,'Ready');assert.equal(restored.get('performerCue').dataset.action,'ready');assert.equal(restored.get('cueNext').textContent,'Next: Play');
+ assert.equal(restored.frame(),0);
+ restored.get('trafficLight').listeners.change({target:{checked:false}});
+ assert.equal(restored.document.documentElement.dataset.mode,'full');assert.equal(JSON.parse(storage.get('maestro-preferences')).trafficLight,false);
 });
