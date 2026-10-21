@@ -24,6 +24,7 @@ juce_add_plugin(MaestroCue
     COMPANY_NAME Kenneide
     BUNDLE_ID com.kenneide.maestro.cue
     PRODUCT_NAME "Maestro Cue"
+    ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/../design/generated/icon-1024.png"
     PLUGIN_MANUFACTURER_CODE Knde
     PLUGIN_CODE Mcue
     FORMATS AU AUv3 Standalone

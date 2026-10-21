@@ -17,7 +17,7 @@ node design/generate.mjs
 node design/generate.mjs --check
 ```
 
-`generate.mjs` also renders `mark.svg` in the dark accent on the dark background into `generated/icon-180.png` and `generated/icon-512.png`, the iPhone/iPad home-screen icons. The mark must stay a straight-line path (`M`/`L`/`H`/`V`/`Z`) for this renderer.
+`generate.mjs` also renders `mark.svg` in the dark accent on the dark background into `generated/icon-180.png` and `generated/icon-512.png` for the web app, and `generated/icon-1024.png` for the native app. JUCE's `ICON_BIG` setting packages the native asset into the standalone app's macOS icon. The mark must stay a straight-line path (`M`/`L`/`H`/`V`/`Z`) for this renderer.
 
 Commit the JSON and all generated files together. Node 18+ is required for development. The web client loads `generated/tokens.css`; JUCE includes `generated/Tokens.h`. CMake configuration and the client check command reject stale adapters. New tokens must exist in the same order in both themes. Colors use hex RGB or RGBA; the generator converts RGBA to JUCE ARGB.
 
