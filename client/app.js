@@ -17,20 +17,21 @@ async function keepAwake(){
  }
 }
 function renderStatic(){
- $('trackTitle').textContent=state.title;
- $('trackSource').textContent=`DJAY / DECK ${live.deck}`;
+ $('trackTitle').textContent=`Deck ${live.deck} · ${state.title}`;
  $('trackSubtitle').textContent=live.values.artist||'';
- $('writtenLabel').textContent=state.instrument==='C'?'CONCERT KEY':'YOUR WRITTEN KEY';
  $('writtenKey').textContent=writtenKey(state.key,state.instrument,state.mode);
  $('writtenMode').textContent=state.key===null?'':state.mode;
- $('concertLabel').textContent=state.key===null?'Key not received':`Concert ${writtenKey(state.key,'C',state.mode)} ${state.mode}`;
  $('bpmDisplay').textContent=state.bpm??'—';
  const grid=!live.stale&&Number.isInteger(live.values.bar)&&Number.isInteger(live.values.beat)?{bar:live.values.bar,beat:live.values.beat}:null;
  $('barDisplay').textContent=grid?`Bar ${grid.bar} · beat ${grid.beat}`:'Waiting for beat grid';
  [...$('beatDots').children].forEach((dot,i)=>dot.classList.toggle('active',Boolean(grid)&&grid.beat===i+1));
- $('currentTime').textContent=state.position===null?'—':formatTime(state.position);
- $('duration').textContent=state.duration===null?'—':formatTime(state.duration);
- $('timeStatus').textContent=live.stale?'Position unavailable':state.playing?'Playing':'Paused';
+ const positionAvailable=state.position!==null;
+ $('trackTimeline').dataset.available=String(positionAvailable);
+ $('trackTimeline').setAttribute('aria-hidden',String(!positionAvailable));
+ $('trackProgress').value=state.position!==null&&state.duration?Math.max(0,Math.min(1,state.position/state.duration)):0;
+ $('currentTime').textContent=positionAvailable?formatTime(state.position):'';
+ $('duration').textContent=positionAvailable&&state.duration!==null?formatTime(state.duration):'';
+ $('timeStatus').textContent=!positionAvailable?'':state.playing?'Playing':'Paused';
  $('connectionText').textContent=live.stale?'Waiting for djay':`Connected · Deck ${live.deck}`;
  $('connectionText').parentElement.dataset.fresh=String(!live.stale);
  keepAwake();
@@ -96,7 +97,7 @@ function updateLive(){
  const encoded=active?(Number.isInteger(values.playbackKey)?values.playbackKey:values.songKey):null;
  const validKey=Number.isInteger(encoded)&&encoded>=0&&encoded<24;
  const minor=validKey&&encoded%2===1;
- Object.assign(state,{title:values.loaded===0?`Deck ${live.deck} · empty`:values.title||'Waiting for djay',duration:active&&Number.isFinite(values.duration)&&values.duration>0?values.duration:null,key:validKey?(Math.floor(encoded/2)+(minor?9:0))%12:null,mode:minor?'minor':'major',bpm:active&&values.bpm>0?Number(values.bpm.toFixed(1)):null,playing:!live.stale&&values.playing===1,position:!live.stale?Math.max(0,values.time):null});
+ Object.assign(state,{title:values.loaded===0?'Empty':values.title||'Waiting for djay',duration:active&&Number.isFinite(values.duration)&&values.duration>0?values.duration:null,key:validKey?(Math.floor(encoded/2)+(minor?9:0))%12:null,mode:minor?'minor':'major',bpm:active&&values.bpm>0?Number(values.bpm.toFixed(1)):null,playing:!live.stale&&values.playing===1,position:!live.stale?Math.max(0,values.time):null});
  updateBridgeControls();renderStatic();
 }
 function renderCue(){
@@ -104,9 +105,9 @@ function renderCue(){
  // A server started before cue support omits the field entirely; it must be restarted to receive cues.
  const outdated=live.connected&&live.snapshot&&!('cue' in live.snapshot);
  const detail=value==='green'?'The DJ is cueing you in':value==='red'?'Hold until the DJ cues you':outdated?'Maestro’s server is out of date. Restart it to receive cues.':'Waiting for the Maestro Cue plugin in djay';
- $('performerCue').dataset.cue=value;
- $('cueLight').textContent=value==='green'?'GREEN · PLAY':value==='red'?'RED · HOLD':'NO CUE SIGNAL';
- if($('cueLightDetail').textContent!==detail)$('cueLightDetail').textContent=detail;
+ $('performerCue').dataset.action=value==='green'?'play':'stop';
+ $('cueLight').textContent=value==='green'?'Play':'Stop';
+ if($('cueDiagnostic').textContent!==detail)$('cueDiagnostic').textContent=detail;
 }
 function startBridge(){
  const events=new EventSource('/api/events');
@@ -116,6 +117,6 @@ function startBridge(){
  $('refreshLive').addEventListener('click',async()=>{try{const response=await fetch('/api/refresh',{method:'POST'});if(!response.ok)throw Error();notify('State refresh requested. Check OSC sending in djay if no data arrives.');}catch{notify('The local bridge is unavailable. Restart Maestro’s server.');}});
 }
 const themeToggle=$('themeToggle');
-function renderThemeControl(){const light=document.documentElement.dataset.theme==='light';themeToggle.textContent=light?'Dark mode':'Light mode';themeToggle.setAttribute('aria-label',`Switch to ${light?'dark':'light'} mode`);}
+function renderThemeControl(){const light=document.documentElement.dataset.theme==='light';themeToggle.setAttribute('aria-label',`Switch to ${light?'dark':'light'} mode`);themeToggle.setAttribute('title',`Switch to ${light?'dark':'light'} mode`);}
 themeToggle.addEventListener('click',()=>{window.maestroTheme.set(document.documentElement.dataset.theme==='light'?'dark':'light');renderThemeControl();});
 renderThemeControl();updateLive();renderCue();startBridge();

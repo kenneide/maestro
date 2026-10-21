@@ -32,7 +32,7 @@ The local Node server receives OSC over UDP and pushes snapshots to the browser 
 
 Title, current tempo, key, playback state, position, bar and beat are reported from djay. The large key is transposed for the instrument key selected in **Settings**. The app prefers `/playback/key` if available and labels it as a reported playback key. This address was observed in the user's live build on 19 October 2026; response to pitch-shifting has not been independently verified. Key mapping follows the PDF's alternating major/relative-minor encoding. Unknown codes remain unknown.
 
-Track time follows reported djay position directly, including seeks. Missing or stale position displays a dash and “Position unavailable”; the browser does not estimate forward motion. Playback stays under djay’s control.
+Track time follows reported djay position directly, including seeks. Missing or stale position leaves the timeline area empty; the browser does not estimate forward motion. Playback stays under djay’s control.
 
 ## Receive OSC from another computer over Wi-Fi
 
@@ -66,13 +66,13 @@ If the Mac's Wi-Fi address changes, open the new address in Safari and add it to
 
 ## Performer cue
 
-The [Maestro Cue plugin](../plugin/README.md) sends `/maestro/cue` with `"red"` or `"green"` to the same receive port as djay. It resends the cue every second. Maestro shows a large red (hold) or green (play) light above the track. If no cue has arrived for 3 seconds, or the bridge disconnects, Maestro shows **NO CUE SIGNAL**. Cue messages appear in the diagnostics message log but do not count as djay data.
+The [Maestro Cue plugin](../plugin/README.md) sends `/maestro/cue` with `"red"` or `"green"` to the same receive port as djay. It resends the cue every second. Maestro shows **Play** for a green cue and **Stop** for a red cue, with green Play text and red Stop text. Missing or expired cues and bridge disconnections show **Stop**; cue connection details are available in **Debug**. Cue messages appear in the diagnostics message log but do not count as djay data.
 
 ## Musician settings
 
 Open **Settings** to choose your instrument key: **C**, **B♭**, **E♭**, or **F**. Written keys transpose concert pitch by 0, 2, 9, or 7 semitones respectively. Changes apply immediately and persist in this browser; existing saxophone preferences migrate automatically. The default is E♭. The followed deck also persists.
 
-The main view shows performer cues, track title and artist, written and concert keys, tempo, bar/beat, read-only track time, and connection status. **F** enters full screen when no control or dialog has focus. Full-screen behavior depends on the browser.
+The viewport-sized main view has matching uppercase section headings and divider lines: **CUE** for Play / Stop, **AUDIO** for the deck number, track title/artist and a read-only timeline, and **MUSIC** for balanced KEY and BPM columns with beat dots. Long track names are truncated to keep the stage compact. Connection status and the Debug toggle sit at the bottom; expanded diagnostics scroll within an overlay panel. **F** enters full screen when no control or dialog has focus. Full-screen behavior depends on the browser.
 
 **Debug** is collapsed on each page load. Expand it for connection instructions, receiver and crossfader diagnostics, refresh, and the filterable recent OSC message log. Rehearsal, audio loading, waveforms, manual markers, and browser playback are no longer part of the client.
 
@@ -90,4 +90,4 @@ Default ports can be changed with `PORT`, `OSC_PORT`, and `DJAY_PORT`. `HTTP_HOS
 
 ## Appearance
 
-Maestro defaults to dark mode. The header's **Light mode / Dark mode** button remembers your selection in this browser. Existing Horizon musician preferences migrate automatically. The [shared design system](../design/README.md) contains the source colors, spacing, typography, and brand assets used by the web client and plugin.
+Maestro defaults to dark mode. Open the gear icon for **Settings** and use the sun/moon SVG button under **Appearance** to change theme. Your selection is remembered in this browser. Existing Horizon musician preferences migrate automatically. The [shared design system](../design/README.md) contains the source colors, spacing, typography, and brand assets used by the web client and plugin.
