@@ -16,7 +16,7 @@ Install
    This build isn't notarized by Apple, so macOS asks once.
    Or, in Terminal:  bash "Install Maestro Cue.command"
 3. Quit and reopen djay Pro.
-4. In djay, open an audio FX / plugin slot and load "Zoundio: Maestro Cue".
+4. In djay, open an audio FX / plugin slot and load "Kenneide: Maestro Cue".
    If djay lists the plugin twice, either one works. If djay doesn't list it,
    open "Maestro Cue" from your Applications folder once, then restart djay.
 

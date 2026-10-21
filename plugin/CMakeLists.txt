@@ -14,10 +14,10 @@ FetchContent_Declare(JUCE
 FetchContent_MakeAvailable(JUCE)
 
 juce_add_plugin(MaestroCue
-    COMPANY_NAME Zoundio
-    BUNDLE_ID com.zoundio.maestro.cue
+    COMPANY_NAME Kenneide
+    BUNDLE_ID com.kenneide.maestro.cue
     PRODUCT_NAME "Maestro Cue"
-    PLUGIN_MANUFACTURER_CODE Zndo
+    PLUGIN_MANUFACTURER_CODE Knde
     PLUGIN_CODE Mcue
     FORMATS AU AUv3 Standalone
     AU_MAIN_TYPE kAudioUnitType_Effect

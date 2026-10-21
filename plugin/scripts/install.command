@@ -32,16 +32,16 @@ open -g "$apps/Maestro Cue.app"
 sleep 3
 osascript -e 'quit app "Maestro Cue"' 2>/dev/null || true
 
-if auval -v aufx Mcue Zndo > /dev/null 2>&1; then
+if auval -v aufx Mcue Knde > /dev/null 2>&1; then
     echo "Audio Unit validation: PASS"
 else
-    echo "Audio Unit validation: FAILED. Run 'auval -v aufx Mcue Zndo' in Terminal for details."
+    echo "Audio Unit validation: FAILED. Run 'auval -v aufx Mcue Knde' in Terminal for details."
 fi
 
 cat <<'EOF'
 
 Next steps:
   1. Quit and reopen djay Pro.
-  2. Load "Zoundio: Maestro Cue" in a djay audio FX / plugin slot.
+  2. Load "Kenneide: Maestro Cue" in a djay audio FX / plugin slot.
   3. Run Horizon on this Mac to see the cue light (the plugin sends to 127.0.0.1:9000).
 EOF

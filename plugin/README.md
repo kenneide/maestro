@@ -22,7 +22,7 @@ The build produces these outputs:
 Validate the AU v2 build with:
 
 ```sh
-auval -v aufx Mcue Zndo
+auval -v aufx Mcue Knde
 ```
 
 Development builds are signed ad hoc. If djay refuses to load the AUv3 extension, sign it with an Apple Developer team.
@@ -40,7 +40,7 @@ The package is ad-hoc signed, not notarized. The recipient must open `Install Ma
 ## Use in djay Pro
 
 1. Start Horizon: `npm --prefix client start`.
-2. In djay Pro, open the audio FX / plugin slot and load **Zoundio: Maestro Cue**. Use the AU v2 or AUv3 version, whichever djay lists.
+2. In djay Pro, open the audio FX / plugin slot and load **Kenneide: Maestro Cue**. Use the AU v2 or AUv3 version, whichever djay lists.
 3. Click the big button, or press Space while the plugin window has focus, to switch between **HOLD** (red) and **PLAY** (green).
 4. Optional: MIDI-map the plugin's **Cue** parameter to a controller button.
 
