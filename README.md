@@ -6,7 +6,7 @@ Maestro aims to give musicians visibility into the current track's key, upcoming
 
 ## Status
 
-Early MVP development. The [Horizon web client](client/README.md) includes a local OSC bridge for djay Pro; plugin development is next.
+Early MVP development. The [Horizon web client](client/README.md) includes a local OSC bridge for djay Pro. The [Maestro Cue plugin](plugin/README.md) is an Audio Unit for djay Pro. It sends red/green performance cues to Horizon.
 
 ## Run the client
 
@@ -24,6 +24,15 @@ npm --prefix client test
 ```
 
 For OSC from another computer, use **Run client — Wi-Fi** and have the sender target your Mac’s LAN IP on UDP port 9000. See the [client README](client/README.md) for Wi-Fi diagnostics, djay OSC setup, and rehearsal mode.
+
+## Build the plugin
+
+```sh
+cmake -S plugin -B plugin/build -G Xcode
+cmake --build plugin/build --config Release
+```
+
+See the [plugin README](plugin/README.md) for installation and djay setup.
 
 ## Project docs
 

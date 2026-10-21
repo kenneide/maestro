@@ -84,3 +84,25 @@ test('LAN interface packets update stage data and requests use the configured ho
   assert.equal(bridge.snapshot().lastSender.address,address);
  }finally{bridge?.close();receiver.close();sender.close();}
 });
+
+test('performer cue from the Maestro plugin is tracked without counting as djay data',{timeout:10000},async()=>{
+ const sender=dgram.createSocket('udp4');
+ const bridge=createBridge({receivePort:0,requestHost:''});
+ const cue=value=>Buffer.concat([str('/maestro/cue'),typeof value==='string'?Buffer.concat([str(',s'),str(value)]):Buffer.concat([str(',i'),Buffer.alloc(4)])]);
+ try{
+  await until(()=>bridge.snapshot().ready);
+  const {receivePort}=bridge.snapshot();
+  assert.equal(bridge.snapshot().cue,null);
+  await send(sender,cue('green'),receivePort);
+  await until(()=>bridge.snapshot().cue?.state==='green');
+  await send(sender,cue('red'),receivePort);
+  await until(()=>bridge.snapshot().cue?.state==='red');
+  await send(sender,cue('blue'),receivePort);
+  await send(sender,cue(1),receivePort);
+  await until(()=>bridge.snapshot().incomingPackets===4);
+  const state=bridge.snapshot();
+  assert.equal(state.cue.state,'red');
+  assert.equal(state.packets,0);
+  assert.equal(state.status,'waiting');
+ }finally{bridge.close();sender.close();}
+});

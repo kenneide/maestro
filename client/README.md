@@ -66,6 +66,10 @@ The waveform then follows djay's reported source position without playing duplic
 
 Automatically switching decks, receiving a changed title/duration or unload, or reconnecting after a long stream gap detaches matching audio and markers. UDP is unordered and the protocol has no track IDs or atomic snapshot marker, so this is best-effort invalidation. Reconfirm after any ambiguous track replacement.
 
+## Performer cue
+
+The [Maestro Cue plugin](../plugin/README.md) sends `/maestro/cue` with `"red"` or `"green"` to the same receive port as djay. It resends the cue every second. Horizon shows a large red (hold) or green (play) light above the track. If no cue has arrived for 3 seconds, or the bridge disconnects, Horizon shows **NO CUE SIGNAL**. Cue messages appear in the diagnostics message log but do not count as djay data.
+
 ## Rehearsal
 
 Rehearsal offers a silent demo or playback of a local audio file. Key, mode, tempo, beat-grid start and markers are entered manually. Bar counts assume constant tempo and 4/4. Select alto/baritone (E-flat), tenor/soprano (B-flat), or concert pitch. Space plays/pauses and arrow keys seek when no form control has focus; F enters full screen. Full-screen behavior depends on the browser.

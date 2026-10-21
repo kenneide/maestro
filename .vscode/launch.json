@@ -36,6 +36,14 @@
         "OSC_HOST": "0.0.0.0",
         "DJAY_HOST": ""
       }
+    },
+    {
+      "name": "Run plugin (standalone)",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/plugin/build/MaestroCue_artefacts/Debug/Standalone/Maestro Cue.app/Contents/MacOS/Maestro Cue",
+      "cwd": "${workspaceFolder}/plugin",
+      "preLaunchTask": "Build plugin standalone (Debug)"
     }
   ]
 }

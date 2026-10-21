@@ -253,11 +253,18 @@ function renderLiveLabels(){
  $('connectionText').textContent=live.stale?'Live mode · waiting for fresh djay position':`Following Deck ${live.deck} · no browser audio · preview measured in track seconds`;
  $('playbackHint').textContent='Transport controlled in djay';
 }
+function renderCue(){
+ const cue=live.snapshot?.cue,fresh=live.connected&&cue&&live.snapshot.now-cue.updated<=3000,value=fresh?cue.state:'unknown';
+ if($('performerCue').dataset.cue===value)return;
+ $('performerCue').dataset.cue=value;
+ $('cueLight').textContent=value==='green'?'GREEN · PLAY':value==='red'?'RED · HOLD':'NO CUE SIGNAL';
+ $('cueLightDetail').textContent=value==='green'?'The DJ is cueing you in':value==='red'?'Hold until the DJ cues you':'Waiting for the Maestro Cue plugin in djay';
+}
 function startBridge(){
  const events=new EventSource('/api/events');
- events.onmessage=event=>{try{const data=JSON.parse(event.data);if(!Array.isArray(data.decks)||data.decks.length!==4)return;live.snapshot=data;live.received=Date.now();live.connected=true;updateLive();}catch{}};
- events.onerror=()=>{live.connected=false;updateLive();};
- setInterval(()=>{if(Date.now()-live.received>2500&&live.connected){live.connected=false;updateLive();}},1000);
+ events.onmessage=event=>{try{const data=JSON.parse(event.data);if(!Array.isArray(data.decks)||data.decks.length!==4)return;live.snapshot=data;live.received=Date.now();live.connected=true;updateLive();renderCue();}catch{}};
+ events.onerror=()=>{live.connected=false;updateLive();renderCue();};
+ setInterval(()=>{if(Date.now()-live.received>2500&&live.connected){live.connected=false;updateLive();renderCue();}},1000);
  $('followMode').addEventListener('change',e=>e.target.value==='live'?enterLive():leaveLive());
  $('refreshLive').addEventListener('click',async()=>{try{const response=await fetch('/api/refresh',{method:'POST'});if(!response.ok)throw Error();notify('State refresh requested. Check OSC sending in djay if no data arrives.');}catch{notify('The local bridge is unavailable. Restart Horizon’s server.');}});
  $('attachAudio').addEventListener('click',()=>{

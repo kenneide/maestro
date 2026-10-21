@@ -1,0 +1,15 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build plugin standalone (Debug)",
+      "type": "shell",
+      "command": "test -d plugin/build/MaestroCue.xcodeproj || cmake -S plugin -B plugin/build -G Xcode; cmake --build plugin/build --config Debug --target MaestroCue_Standalone",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "problemMatcher": "$gcc"
+    }
+  ]
+}
