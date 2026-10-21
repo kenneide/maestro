@@ -43,6 +43,6 @@ cat <<'EOF'
 Next steps:
   1. Quit and reopen djay Pro.
   2. Load "Kenneide: Maestro Cue" in a djay audio FX / plugin slot.
-  3. In the plugin's SEND TO field, enter the IP address and port of the computer running Maestro
+  3. In the plugin's Settings (gear) → CONNECTION section, enter the IP address and port of the computer running Maestro
      (default 127.0.0.1:9000 = this Mac), then press Apply.
 EOF

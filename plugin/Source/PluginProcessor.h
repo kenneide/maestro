@@ -3,9 +3,10 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_osc/juce_osc.h>
 #include "Preferences.h"
+#include "MusicianLink.h"
 
 // Pass-through audio effect that broadcasts the DJ's performance cue
-// (red = hold, green = play) to the Maestro client as /maestro/cue over OSC.
+// (red = stop, green = play) to the Maestro client as /maestro/cue over OSC.
 class MaestroCueProcessor final : public juce::AudioProcessor,
                                   private juce::AudioProcessorValueTreeState::Listener,
                                   private juce::Timer
@@ -14,14 +15,16 @@ public:
     static constexpr const char* cueParamId = "go";
     static constexpr const char* defaultHost = "127.0.0.1";
     static constexpr int defaultPort = 9000;
+    static constexpr int defaultWebPort = MusicianLink::defaultWebPort;
 
     struct Destination
     {
         juce::String host;
         int port = defaultPort;
+        int webPort = defaultWebPort;
     };
 
-    MaestroCueProcessor();
+    explicit MaestroCueProcessor (const juce::PropertiesFile::Options& = maestroPreferenceOptions());
     ~MaestroCueProcessor() override;
 
     void prepareToPlay (double, int) override {}
@@ -55,7 +58,8 @@ public:
     Destination getDestination() const;
     // Validates, stores with this instance's state, and remembers it as the default
     // for new instances. Returns false (and keeps the old destination) if invalid.
-    bool setDestination (const juce::String& host, int port);
+    bool setDestination (const juce::String& host, int port, int webPort);
+    bool setDestination (const juce::String& host, int port) { return setDestination (host, port, getDestination().webPort); }
     static bool isValidDestination (const juce::String& host, int port);
 
 private:
@@ -73,7 +77,7 @@ private:
     // without the network.server entitlement denies. sendto() needs only network.client.
     juce::DatagramSocket socket { false };
     juce::OSCSender sender;
-    juce::PropertiesFile preferences { maestroPreferenceOptions() };
+    juce::PropertiesFile preferences;
     // Written on the message thread, but setStateInformation may come from another thread.
     mutable juce::SpinLock destinationLock;
     Destination destination;

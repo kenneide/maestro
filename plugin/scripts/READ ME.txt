@@ -1,7 +1,7 @@
 Maestro Cue: red/green performer cues from djay Pro
 ====================================================
 
-Maestro Cue is an Audio Unit plugin for djay Pro. The DJ flips a red (HOLD) / green (PLAY) light, and the plugin sends it to the Maestro musician app over OSC. Audio passes through unchanged.
+Maestro Cue is an Audio Unit plugin for djay Pro. The DJ flips a red (STOP) / green (PLAY) light, and the plugin sends it to the Maestro musician app over OSC. Audio passes through unchanged.
 
 Requirements
 ------------
@@ -22,19 +22,33 @@ Install
 
 Point the plugin at Maestro
 ---------------------------
-In the plugin window, under SEND TO, enter the IP address and port of the computer running Maestro, then press Apply. Maestro lists its addresses under "OSC connection setup & diagnostics"; the port is normally 9000. Leave 127.0.0.1 if Maestro runs on this Mac.
+In the plugin window, under Settings (gear) → CONNECTION, enter the IP address and port of the computer running Maestro, then press Apply. Maestro lists its addresses under "Debug"; the port is normally 9000. Leave 127.0.0.1 if Maestro runs on this Mac.
 If macOS asks whether djay can find devices on your local network, choose Allow.
 
 The installer puts the plugin in ~/Library/Audio/Plug-Ins/Components and the app in ~/Applications.
 
 Use
 ---
-- Click the big button, or press Space while the plugin window has focus,
-  to switch between HOLD (red) and PLAY (green).
+- Click the big button, or press Space while the main cue view has focus,
+  to switch between STOP (red) and PLAY (green).
 - To use a controller button, MIDI-map the plugin's "Cue" parameter in djay.
-- Maestro shows the light. It shows "NO CUE SIGNAL" if it has heard
+- Maestro shows Play/Stop. It shows "Stop" if it has heard
   nothing for 3 seconds.
 
 Uninstall
 ---------
 Right-click "Uninstall Maestro Cue.command" and choose Open.
+
+OPEN THE MUSICIAN APP
+
+In Settings → MUSICIAN APP, scan the QR code or use the URL shown beside it.
+WEB PORT defaults to 4173 and is separate from OSC PORT (normally 9000).
+For a local OSC destination, the QR uses this Mac's LAN address; choose the
+correct LOCAL ADDRESS if several are listed. No LAN address means no QR.
+
+Run Maestro on the destination Mac using `npm --prefix client run start:lan`
+and connect the musician's device to the same network. The plugin does not
+start the web server. The QR identifies the URL, not server availability.
+
+Use Settings → APPEARANCE for the sun/moon theme button. Escape closes
+Settings; Space toggles the cue only in the main view.

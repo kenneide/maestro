@@ -24,6 +24,7 @@ ditto "$artefacts/Standalone/Maestro Cue.app" "$stage/Maestro Cue.app"
 install -m 755 "$plugin_dir/scripts/install.command" "$stage/Install Maestro Cue.command"
 install -m 755 "$plugin_dir/scripts/uninstall.command" "$stage/Uninstall Maestro Cue.command"
 install -m 644 "$plugin_dir/scripts/READ ME.txt" "$stage/READ ME.txt"
+install -m 644 "$plugin_dir/ThirdParty/qrcodegen/LICENSE" "$stage/QR-Code-generator-LICENSE.txt"
 
 echo "==> Verifying"
 for bundle in "$stage/Maestro Cue.component" "$stage/Maestro Cue.app"; do

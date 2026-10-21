@@ -39,13 +39,17 @@ juce_add_plugin(MaestroCue
     # Sending cues to another computer triggers macOS's Local Network permission prompt.
     PLIST_TO_MERGE "<plist><dict><key>NSLocalNetworkUsageDescription</key><string>Maestro Cue sends performance cues to the Maestro app on another computer.</string></dict></plist>")
 
-juce_add_binary_data(MaestroBrand SOURCES ../design/mark.svg)
+juce_add_binary_data(MaestroBrand SOURCES ../design/mark.svg ../design/icons/settings.svg ../design/icons/sun.svg ../design/icons/moon.svg)
 target_link_libraries(MaestroCue PRIVATE MaestroBrand)
 
 target_sources(MaestroCue
     PRIVATE
         Source/PluginProcessor.cpp
-        Source/PluginEditor.cpp)
+        Source/PluginEditor.cpp
+        ThirdParty/qrcodegen/qrcodegen.cpp)
+# Keep upstream sources unmodified while limiting JUCE's extra shadow warning to our code.
+set_source_files_properties(ThirdParty/qrcodegen/qrcodegen.cpp PROPERTIES
+    COMPILE_OPTIONS "$<$<COMPILE_LANG_AND_ID:CXX,Clang,AppleClang>:-Wno-shadow-field-in-constructor>")
 
 target_compile_definitions(MaestroCue
     PUBLIC
@@ -61,3 +65,27 @@ target_link_libraries(MaestroCue
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags)
+
+include(CTest)
+if(BUILD_TESTING)
+    juce_add_console_app(MaestroCueTests PRODUCT_NAME "Maestro Cue Tests")
+    # juce_add_console_app supplies =1; the plugin interface supplies the equivalent
+    # JucePlugin_Build_Standalone expression. Keep a single definition for test builds.
+    get_target_property(maestro_test_definitions MaestroCueTests COMPILE_DEFINITIONS)
+    list(REMOVE_ITEM maestro_test_definitions "JUCE_STANDALONE_APPLICATION=1")
+    set_property(TARGET MaestroCueTests PROPERTY COMPILE_DEFINITIONS "${maestro_test_definitions}")
+    target_compile_definitions(MaestroCueTests PRIVATE JucePlugin_Build_Standalone=1)
+    target_sources(MaestroCueTests PRIVATE Tests/PluginTests.cpp)
+    target_include_directories(MaestroCueTests PRIVATE Source)
+    target_link_libraries(MaestroCueTests PRIVATE MaestroCue juce::juce_audio_utils juce::juce_osc)
+    set_target_properties(MaestroCueTests PROPERTIES EXCLUDE_FROM_ALL TRUE)
+    add_test(NAME MaestroCueTests COMMAND MaestroCueTests "${CMAKE_CURRENT_BINARY_DIR}/musician-link.png")
+    set_tests_properties(MaestroCueTests PROPERTIES FIXTURES_SETUP MusicianQrFixture)
+    if(APPLE)
+        add_test(NAME MaestroCueQrDecode COMMAND /usr/bin/xcrun swift
+            -module-cache-path "${CMAKE_CURRENT_BINARY_DIR}/swift-cache"
+            "${CMAKE_CURRENT_SOURCE_DIR}/Tests/DecodeQr.swift"
+            "${CMAKE_CURRENT_BINARY_DIR}/musician-link.png" "http://192.168.1.20:8080/")
+        set_tests_properties(MaestroCueQrDecode PROPERTIES FIXTURES_REQUIRED MusicianQrFixture)
+    endif()
+endif()

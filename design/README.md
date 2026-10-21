@@ -6,7 +6,7 @@ The canonical identity and tokens for **Maestro / Musician** (web) and **Maestro
 
 Use `mark.svg` for the geometric M; tint the white silhouette with the theme accent (CSS mask or JUCE Drawable replacement). `wordmark.svg` supplies the monochrome lockup; its text uses system Arial. Product headers use the shared mark alongside native text for legibility and accessibility. `favicon.svg` is the fixed violet app icon. Keep clear space of at least 8px around the mark. Do not use cue red or green as brand colors.
 
-Graphite surfaces and violet accents define dark mode; warm white surfaces and deeper violet define light mode. Red means **HOLD**, green means **PLAY**, neutral means **NO CUE SIGNAL**. Always pair cues with visible text. Amber identifies upcoming markers, not performance permission.
+Graphite surfaces and violet accents define dark mode; warm white surfaces and deeper violet define light mode. Red means **Stop** and green means **Play**. The musician app falls back to Stop if the cue signal is missing or stale. Always pair cues with visible text.
 
 ## Tokens and adapters
 
@@ -25,14 +25,14 @@ Use semantic color names rather than literals. `accent`/`onAccent` is the primar
 
 ## Theme selection
 
-Both interfaces start dark. The header button names the theme it will activate. The web remembers `maestro-theme`, applies it before first paint, and updates canvas colors immediately. Existing `horizon-preferences` migrate into `maestro-preferences`; preview duration still uses the functional `horizon` field. Unavailable browser storage falls back safely.
+Both interfaces start dark. Open the gear button for Settings; the sun/moon icon names the theme it will activate through its tooltip and accessibility title. `icons/settings.svg`, `icons/sun.svg`, and `icons/moon.svg` match the web app’s SVG shapes and are bundled into the plugin. The web remembers `maestro-theme` and applies it before first paint. Existing `horizon-preferences` and saxophone instrument selections migrate into the current preferences. Unavailable browser storage falls back safely.
 
 The plugin stores its selection in a JUCE PropertiesFile (`Maestro/Maestro.settings` under Application Support), separate from DAW state and automation. Editors sharing that file refresh their theme at 4Hz. Sandboxed hosts can isolate settings in their own containers. Plugin identifiers, audio behavior, OSC contract, and parameter IDs are unchanged.
 
 ## Verification
 
-`npm --prefix client run check` checks generated assets and JavaScript syntax. `npm --prefix client test` includes semantic text, control-boundary and focus contrast checks, theme persistence/storage failure checks, legacy preference migration, and existing OSC integration tests. Browser and standalone visual checks should cover both themes, HOLD/PLAY/unknown, rehearsal waveform, dialogs, diagnostics, keyboard focus, and narrow layouts.
+`npm --prefix client run check` checks generated assets and JavaScript syntax. `npm --prefix client test` includes semantic text, control-boundary and focus contrast checks, theme persistence/storage failure checks, legacy preference migration, and existing OSC integration tests. Browser and standalone visual checks should cover both themes, Stop/Play, missing cues, settings, QR scanning, diagnostics, keyboard focus, and narrow layouts.
 
-Dark: graphite canvas, violet actions, pale neutral text, pale red/green cues. Light: warm white canvas, white panels, deep violet actions, charcoal text, deep red/green cues. The cue surface remains lightly tinted in both apps.
+Dark: graphite canvas, violet actions, pale neutral text, pale red/green cues. Light: warm white canvas, white panels, deep violet actions, charcoal text, deep red/green cues. Cue text carries the semantic color on the neutral background. The plugin’s large button retains a visible border and keyboard focus indicator. QR codes always use black modules on white with a four-module quiet zone.
 
-Implementation verification (2026-10-21): all 11 client tests and syntax/drift checks passed; Debug Standalone, AU, and AUv3 builds passed; `auval -v aufx Mcue Knde` passed. Both themes were visually inspected in Safari and the native standalone editor, including the web rehearsal waveform and light setup dialog. Narrow layouts and DAW-hosted editor interaction still need manual review.
+Plugin redesign verification (2026-10-21): all 16 client tests and syntax/drift checks passed; Debug Standalone, AU, and AUv3 builds passed; both native test suites (configuration/state and independent QR decoding) passed; `auval -v aufx Mcue Knde` passed. The standalone editor was visually checked in both themes, including Settings, QR visibility, invalid and custom web ports, Escape, and Space-to-cue behavior. DAW-hosted editor interaction and scanning from a physical phone still need manual review.

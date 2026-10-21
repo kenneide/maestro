@@ -4,7 +4,7 @@ An Audio Unit effect for djay Pro that sends performance cues to the musician. T
 
 ## Build
 
-You need Xcode and CMake 3.22+. CMake downloads JUCE 8.0.15 into `plugin/build/_deps` on first configure. Nothing is vendored.
+You need Xcode and CMake 3.22+. CMake downloads JUCE 8.0.15 into `plugin/build/_deps` on first configure. The small MIT-licensed QR encoder is vendored under `ThirdParty/qrcodegen`; its upstream revision and license are recorded there.
 
 ```sh
 cmake -S plugin -B plugin/build -G Xcode
@@ -43,7 +43,7 @@ The package is ad-hoc signed, not notarized. The recipient must open `Install Ma
 
 1. Start Maestro: `npm --prefix client start`.
 2. In djay Pro, open the audio FX / plugin slot and load **Kenneide: Maestro Cue**. Use the AU v2 or AUv3 version, whichever djay lists.
-3. Click the big button, or press Space while the plugin window has focus, to switch between **HOLD** (red) and **PLAY** (green).
+3. Click the big button, or press Space while the main cue view has focus, to switch between **Stop** (red) and **Play** (green).
 4. Optional: MIDI-map the plugin's **Cue** parameter to a controller button.
 
 The standalone app also works as a sender without djay, which is useful for rehearsal and testing. In VS Code, select **Run plugin (standalone)** in Run and Debug and press **F5**. This builds the Debug standalone app and launches it under the debugger. It needs the CodeLLDB extension.
@@ -54,11 +54,30 @@ The standalone app also works as a sender without djay, which is useful for rehe
 | --- | --- | --- |
 | `/maestro/cue` | `s` `"red"` or `"green"` | On every change, and resent every second as a heartbeat |
 
-Set the destination under **SEND TO** in the plugin window: enter the IP address (or hostname, such as `studio-mac.local`) and the UDP port of the computer running Maestro, then press **Apply** or Return. The default is `127.0.0.1:9000`, the same computer and the same port djay's own OSC uses; the Maestro bridge receives both. Each plugin instance saves its destination with the djay session. The last destination applied becomes the default for new instances. The footer shows **Sending to** or **Send failed** for the current destination. Maestro shows **NO CUE SIGNAL** when it has not received a heartbeat for 3 seconds.
+Open the gear button for **Settings → CONNECTION**: enter the IP address (or hostname, such as `studio-mac.local`) and the **OSC PORT** of the computer running Maestro. **WEB PORT** is the musician app’s HTTP port (default **4173**), separate from the OSC port. Press **Apply** or Return to save all three values together. The default is `127.0.0.1:9000`, the same computer and the same port djay's own OSC uses; the Maestro bridge receives both. Each plugin instance saves its destination and web port with the djay session; older sessions use web port 4173. The last connection settings applied become the default for new instances. Invalid edits leave the applied settings and QR link unchanged. The footer shows **Sending to** or **Send failed** for the current destination. The musician app shows **Stop** when its cue heartbeat expires or the bridge disconnects.
 
-To send to another computer, start Maestro there with **Run client — Wi-Fi**, then use one of the LAN addresses it lists under *OSC connection setup & diagnostics*, with port 9000. The first time cues go to another computer, macOS may ask whether djay (or Maestro Cue) can find devices on your local network. Choose **Allow**. To change it later, go to System Settings → Privacy & Security → Local Network.
+To send to another computer, start Maestro there with **Run client — Wi-Fi**, then use one of the LAN addresses it lists under **Debug**, with port 9000. The first time cues go to another computer, macOS may ask whether djay (or Maestro Cue) can find devices on your local network. Choose **Allow**. To change it later, go to System Settings → Privacy & Security → Local Network.
 
 The plugin never sends cues from the audio thread. Parameter changes, including host automation, set a flag. A 30 Hz message-thread timer then sends the cue.
+
+## Open the musician app by QR
+
+In **Settings → MUSICIAN APP**, scan the QR code to open `http://<destination-host>:<web-port>/`. The readable URL is shown beside it. Codes are generated locally and remain black on white in both themes.
+
+If the OSC destination is `127.0.0.1` or `localhost`, the QR uses this Mac’s LAN IPv4 address instead: a phone’s localhost would point to the phone. If multiple addresses exist, choose the interface reachable by the musician under **LOCAL ADDRESS**. The selection is remembered locally and checked again each time Settings opens. Without a usable LAN address the QR is left empty.
+
+Start Maestro on the destination Mac with `npm --prefix client run start:lan` and connect the musician’s device to the same network. This exposes the musician page and OSC receiver on that Mac’s LAN interfaces; the plugin itself does not start or reconfigure the server. The **Run client — Wi-Fi** launch exposes only OSC and is insufficient for phone access to the page. A QR code identifies the URL; it does not verify server reachability. A custom server `PORT` must match **WEB PORT**.
+
+The gear toggles Settings; Escape returns to the main cue view. Space changes the cue only in the main view, so entering connection settings cannot accidentally cue a musician.
+
+## Native tests
+
+```sh
+cmake --build plugin/build --config Debug --target MaestroCueTests
+ctest --test-dir plugin/build -C Debug --output-on-failure
+```
+
+Tests use temporary preference files, never the user’s saved destinations. They cover QR links, interface filtering/selection, invalid settings, new-instance defaults, session round-trips and legacy web-port fallback, Play/Stop parameter labels and legacy text parsing, and audio passthrough. On macOS an independent Core Image test decodes the generated QR and verifies its URL. To write a QR decoding fixture, run the test executable with a PNG output path as its first argument.
 
 ## Files
 
@@ -68,4 +87,4 @@ The plugin never sends cues from the audio thread. Parameter changes, including 
 
 ## Appearance
 
-The header theme button switches between dark and light modes and remembers the selection separately from DAW automation/state. Shared assets and token generation are documented in the [design system](../design/README.md). Node.js 18+ is required at CMake configuration time to check generated assets.
+The sun/moon SVG button under **Settings → APPEARANCE** switches between dark and light modes and remembers the selection separately from DAW automation/state. Shared assets and token generation are documented in the [design system](../design/README.md). Node.js 18+ is required at CMake configuration time to check generated assets.
