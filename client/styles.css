@@ -22,18 +22,16 @@ main{min-height:0;display:grid;grid-template-rows:minmax(0,1.3fr) auto minmax(0,
 .performer-cue[data-action=play]{color:var(--cue-green)}
 .performer-cue strong{font-size:clamp(64px,18dvh,180px);line-height:1;font-weight:650;letter-spacing:-.06em}
 .music-section{display:grid;grid-template-rows:auto minmax(0,1fr);gap:clamp(4px,1dvh,12px)}
-.musical-info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:center;gap:clamp(20px,5vw,70px);width:min(100%,720px);margin:0 auto;min-height:0}
+.musical-info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;align-content:center;gap:clamp(20px,5vw,70px);width:min(100%,720px);margin:0 auto;min-height:0}
 .metadata-label{line-height:1.2}
 .metadata-value{font-size:clamp(36px,7dvh,76px);letter-spacing:-2px;line-height:1.15;font-weight:650;white-space:nowrap}
 .metadata-value strong{font:inherit}
-.keyblock{min-width:0}.eyebrow{font-size:var(--type-caption);font-weight:650;letter-spacing:1.5px;color:var(--muted)}
+.keyblock,.tempo-block{min-width:0;display:grid;justify-items:center;align-content:start;text-align:center}.eyebrow{font-size:var(--type-caption);font-weight:650;letter-spacing:1.5px;color:var(--muted)}
 .muted{font-size:var(--type-body);color:var(--muted)}
 
 .big-key span+span{font-size:.4em;letter-spacing:-.5px;font-weight:400}
-.tempo-block{min-width:0}
 
-.tempo-block .muted{margin-top:5px;font-size:12px}
-.beat-dots{display:flex;gap:8px;margin-top:8px}.beat-dots i{height:7px;width:7px;border-radius:50%;background:var(--line)}.beat-dots i.active{background:var(--ink)}
+.beat-dots{display:flex;justify-content:center;gap:8px;margin-top:8px}.beat-dots i{height:7px;width:7px;border-radius:50%;background:var(--line)}.beat-dots i.active{background:var(--ink)}
 progress{appearance:none;-webkit-appearance:none;border:0;display:block;background:var(--surface);border-radius:4px;overflow:hidden;color:var(--ink)}
 progress::-webkit-progress-bar{background:var(--surface)}progress::-webkit-progress-value{background:var(--ink)}progress::-moz-progress-bar{background:var(--ink)}
 .track-timeline[data-available=false]{visibility:hidden}
@@ -57,4 +55,4 @@ h2{font-size:var(--type-heading);font-weight:500;margin:0}.settings-body{padding
 @media(max-width:600px){.wordmark small,.wordmark>span:not(.brand-mark){display:none}.masthead{height:56px}.wordmark{font-size:17px;letter-spacing:1.7px}.musical-info{gap:20px}.eyebrow{font-size:10px;letter-spacing:1px}.muted{font-size:12px}.performer-cue strong{font-size:clamp(64px,17dvh,140px)}}
 @media(max-height:540px){.masthead{height:48px}main{gap:6px;padding:6px 0;grid-template-rows:minmax(0,1fr) auto minmax(0,1fr)}.performer-cue strong{font-size:clamp(44px,14dvh,76px)}.metadata-value{font-size:34px}.stage-section{padding-top:6px}.track-progress{margin:6px 0}.beat-dots{margin-top:5px}h1{font-size:18px;margin:0 0 2px}.app{grid-template-rows:auto minmax(0,1fr) 44px}}
 
-@media(max-height:420px){.metadata-value{font-size:28px}.tempo-block .muted{margin-top:2px}.beat-dots{margin-top:3px}.stage-section{padding-top:4px}.track-time,.track-time .muted{font-size:11px}}
+@media(max-height:420px){.metadata-value{font-size:28px}.beat-dots{margin-top:3px}.stage-section{padding-top:4px}.track-time,.track-time .muted{font-size:11px}}

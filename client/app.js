@@ -23,7 +23,6 @@ function renderStatic(){
  $('writtenMode').textContent=state.key===null?'':state.mode;
  $('bpmDisplay').textContent=state.bpm??'—';
  const grid=!live.stale&&Number.isInteger(live.values.bar)&&Number.isInteger(live.values.beat)?{bar:live.values.bar,beat:live.values.beat}:null;
- $('barDisplay').textContent=grid?`Bar ${grid.bar} · beat ${grid.beat}`:'Waiting for beat grid';
  [...$('beatDots').children].forEach((dot,i)=>dot.classList.toggle('active',Boolean(grid)&&grid.beat===i+1));
  const positionAvailable=state.position!==null;
  $('trackTimeline').dataset.available=String(positionAvailable);
