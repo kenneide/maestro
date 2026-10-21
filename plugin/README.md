@@ -27,6 +27,16 @@ auval -v aufx Mcue Zndo
 
 Development builds are signed ad hoc. If djay refuses to load the AUv3 extension, sign it with an Apple Developer team.
 
+## Package for another Mac
+
+```sh
+bash plugin/scripts/package.sh
+```
+
+This builds a universal (Apple silicon + Intel) Release in `plugin/build-dist`. It then writes `plugin/dist/MaestroCue-<version>-macOS.zip`. The zip contains the AU v2 component, the app with the embedded AUv3, install and uninstall scripts, and a `READ ME.txt` for the recipient. The version comes from `project(... VERSION ...)` in `CMakeLists.txt`.
+
+The package is ad-hoc signed, not notarized. The recipient must open `Install Maestro Cue.command` with right-click → Open the first time. The installer copies the plugin to `~/Library/Audio/Plug-Ins/Components` and the app to `~/Applications`. It also clears the download quarantine, refreshes the Audio Unit cache, registers the AUv3 and runs `auval`. A warning-free install would need a Developer ID certificate and notarization.
+
 ## Use in djay Pro
 
 1. Start Horizon: `npm --prefix client start`.
