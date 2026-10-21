@@ -8,11 +8,33 @@
       "program": "${workspaceFolder}/client/server.mjs",
       "cwd": "${workspaceFolder}/client",
       "console": "internalConsole",
-      "skipFiles": ["<node_internals>/**"],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
       "serverReadyAction": {
         "pattern": "Horizon is ready: (http://localhost:[0-9]+)",
         "uriFormat": "%s",
         "action": "openExternally"
+      }
+    },
+    {
+      "name": "Run client — Wi-Fi",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/client/server.mjs",
+      "cwd": "${workspaceFolder}/client",
+      "console": "internalConsole",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "serverReadyAction": {
+        "pattern": "Horizon is ready: (http://localhost:[0-9]+)",
+        "uriFormat": "%s",
+        "action": "openExternally"
+      },
+      "env": {
+        "OSC_HOST": "0.0.0.0",
+        "DJAY_HOST": ""
       }
     }
   ]

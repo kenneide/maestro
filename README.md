@@ -23,7 +23,7 @@ npm --prefix client run check
 npm --prefix client test
 ```
 
-See the [client README](client/README.md) for djay OSC setup and rehearsal mode.
+For OSC from another computer, use **Run client — Wi-Fi** and have the sender target your Mac’s LAN IP on UDP port 9000. See the [client README](client/README.md) for Wi-Fi diagnostics, djay OSC setup, and rehearsal mode.
 
 ## Project docs
 

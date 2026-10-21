@@ -197,7 +197,7 @@ function leaveLive(){
 function liveIdentity(deck){return `${live.snapshot.session}:${deck.id}:${deck.generation}:${deck.values.title??''}:${deck.values.duration??''}`;}
 function updateBridgeControls(){
  const snapshot=live.snapshot;
- const status=!live.connected?'Bridge disconnected':snapshot?.error?`OSC error: ${snapshot.error}`:snapshot?.status==='receiving'?'OSC receiving':snapshot?.status==='stale'?'OSC stream stale':'Waiting for OSC · 127.0.0.1:9000';
+ const status=!live.connected?'Bridge disconnected':snapshot?.error?`OSC error: ${snapshot.error}`:snapshot?.status==='receiving'?'OSC receiving':snapshot?.status==='stale'?'OSC stream stale':`Waiting for OSC · ${snapshot?.receiveHost??'127.0.0.1'}:${snapshot?.receivePort??9000}`;
  const label=live.enabled&&snapshot?.status==='receiving'?(live.stale?`Deck ${live.deck} · waiting for fresh position`:`Deck ${live.deck} · ${state.playing?'playing':'paused'}${live.values.loop===1?' · loop':''}${Number.isFinite(live.crossfader)?live.crossfader>0.001&&live.crossfader<0.999?' · holding through blend':' · crossfader endpoint':' · crossfader unavailable'}`):status;
  if($('liveStatus').textContent!==label)$('liveStatus').textContent=label;
  $('liveStatus').dataset.fresh=String(live.connected&&snapshot?.status==='receiving'&&(!live.enabled||!live.stale));
@@ -206,6 +206,17 @@ function updateBridgeControls(){
  if(live.attachment)$('attachAudio').disabled=false;
  if(snapshot){
   $('receivePort').textContent=snapshot.receivePort;$('requestPort').textContent=snapshot.requestPort;
+  $('receiveDestinations').textContent=(snapshot.destinations||['127.0.0.1']).join(' or ');
+  $('refreshLive').disabled=!snapshot.requestsEnabled;
+  $('requestDiagnostic').textContent=snapshot.requestsEnabled?`State requests go to ${snapshot.requestHost}:${snapshot.requestPort}.`:'Passive reception: state requests are disabled. The sender must stream updates.';
+  const sender=snapshot.lastSender?`${snapshot.lastSender.address}:${snapshot.lastSender.port}`:'none';
+  const recentSupported=snapshot.lastRecognized&&snapshot.now-snapshot.lastRecognized<=2500;
+  $('packetDiagnostic').textContent=`${snapshot.incomingPackets} UDP packets received · last sender: ${sender} · ${recentSupported?'supported djay data received recently':snapshot.incomingPackets?'waiting for fresh supported djay data':'waiting for packets'}.`;
+  if($('messageDetails').open){
+   const lines=(snapshot.recentMessages||[]).slice().reverse().map(entry=>`${new Date(entry.timestamp).toLocaleTimeString()} ${entry.sender.address}:${entry.sender.port} ${entry.error?`DECODE ERROR: ${entry.error} · hex ${entry.hex}`:`${entry.address} ${JSON.stringify(entry.args)}${entry.omittedArgs?` (+${entry.omittedArgs} arguments)`:''}`}`);
+   const text=lines.join('\n')||'No messages received yet.';
+   if($('messageLog').textContent!==text)$('messageLog').textContent=text;
+  }
   $('bridgeDiagnostic').textContent=`Receiver ${snapshot.ready?'listening':'not ready'} · ${snapshot.packets} djay packets · ${snapshot.recognized} mapped values · ${snapshot.malformed} malformed packets. ${snapshot.error||''}`;
   $('keyDiagnostic').textContent=snapshot.addresses.some(a=>a.endsWith('/playback/key'))?'A playback/key address has been received. Verify its response to pitch shifts in djay before treating it as the sounding key.':'Only reported song keys are available so far. The PDF repeats song/key in its playback section; pitch-shift behavior remains unverified.';
  }

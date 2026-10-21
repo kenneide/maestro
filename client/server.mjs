@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 import {spawn} from 'node:child_process';
 import {createBridge} from './bridge.mjs';
 const port=Number(process.env.PORT||4173);
-const bridge=createBridge({receivePort:Number(process.env.OSC_PORT||9000),requestPort:Number(process.env.DJAY_PORT||9001)});
+const bridge=createBridge({receivePort:Number(process.env.OSC_PORT||9000),requestPort:Number(process.env.DJAY_PORT||9001),receiveHost:process.env.OSC_HOST||'127.0.0.1',requestHost:process.env.DJAY_HOST??'127.0.0.1'});
 const files=new Map([['/','index.html'],['/index.html','index.html'],['/app.js','app.js'],['/music.js','music.js'],['/styles.css','styles.css']]);
 const types={html:'text/html; charset=utf-8',js:'text/javascript; charset=utf-8',css:'text/css; charset=utf-8'};
 http.createServer(async(req,res)=>{
