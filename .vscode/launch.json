@@ -38,6 +38,27 @@
       }
     },
     {
+      "name": "Run client — iPhone/iPad",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/client/server.mjs",
+      "cwd": "${workspaceFolder}/client",
+      "console": "internalConsole",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "serverReadyAction": {
+        "pattern": "Maestro is ready: (http://localhost:[0-9]+)",
+        "uriFormat": "%s",
+        "action": "openExternally"
+      },
+      "env": {
+        "OSC_HOST": "0.0.0.0",
+        "HTTP_HOST": "0.0.0.0",
+        "DJAY_HOST": ""
+      }
+    },
+    {
       "name": "Run plugin (standalone)",
       "type": "lldb",
       "request": "launch",

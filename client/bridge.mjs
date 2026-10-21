@@ -2,7 +2,7 @@ import dgram from 'node:dgram';
 import {randomUUID} from 'node:crypto';
 import {networkInterfaces} from 'node:os';
 import {decodePacket,encodeMessage,newDeck,applyMessage} from './osc.mjs';
-export function createBridge({receivePort=9000,requestPort=9001,receiveHost='127.0.0.1',requestHost='127.0.0.1'}={}){
+export function createBridge({receivePort=9000,requestPort=9001,receiveHost='127.0.0.1',requestHost='127.0.0.1',pageUrls=()=>[]}={}){
  const socket=dgram.createSocket('udp4'),clients=new Set();
  let decks=Array.from({length:4},(_,i)=>newDeck(i+1)),lastPacket=0,packets=0,recognized=0,malformed=0,lastRequest=0,ready=false,error=null,session=randomUUID();
  const addresses=new Set();
@@ -11,7 +11,7 @@ export function createBridge({receivePort=9000,requestPort=9001,receiveHost='127
  const clipped=value=>typeof value==='string'&&value.length>512?value.slice(0,512)+'…':value;
  function record(entry){recentMessages.push(entry);if(recentMessages.length>100)recentMessages.shift();}
  let mixer={crossfader:null},cue=null;
- function snapshot(){const now=Date.now();const destinations=receiveHost==='0.0.0.0'?[...new Set(['127.0.0.1',...Object.values(networkInterfaces()).flat().filter(info=>info.family==='IPv4'&&!info.internal).map(info=>info.address)])]:[receiveHost];return {session,now,ready,error,receiveHost,receivePort,requestHost,requestPort,requestsEnabled:Boolean(requestHost),destinations,incomingPackets,lastIncoming,lastSender,lastRecognized,recentMessages:[...recentMessages],lastPacket,packets,recognized,malformed,status:!ready?'error':!lastPacket?'waiting':now-lastPacket>2500?'stale':'receiving',addresses:[...addresses],mixer,cue,decks};}
+ function snapshot(){const now=Date.now();const destinations=receiveHost==='0.0.0.0'?[...new Set(['127.0.0.1',...Object.values(networkInterfaces()).flat().filter(info=>info.family==='IPv4'&&!info.internal).map(info=>info.address)])]:[receiveHost];return {session,now,ready,error,receiveHost,receivePort,requestHost,requestPort,requestsEnabled:Boolean(requestHost),destinations,incomingPackets,lastIncoming,lastSender,lastRecognized,recentMessages:[...recentMessages],lastPacket,packets,recognized,malformed,status:!ready?'error':!lastPacket?'waiting':now-lastPacket>2500?'stale':'receiving',addresses:[...addresses],mixer,cue,pageUrls:pageUrls(),decks};}
  function dump(){const now=Date.now();if(!requestHost||!ready||now-lastRequest<1100)return false;lastRequest=now;socket.send(encodeMessage('/djay/request/dumpAll'),requestPort,requestHost,e=>{if(e)error=e.message;});return true;}
  socket.on('message',(packet,remote)=>{
   const receivedAt=Date.now(),sender={address:remote.address,port:remote.port};

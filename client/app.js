@@ -173,7 +173,7 @@ $('instrument').addEventListener('change',e=>{state.instrument=e.target.value;pe
 document.querySelectorAll('[data-window]').forEach(b=>b.addEventListener('click',()=>{state.horizon=Number(b.dataset.window);persist();renderStatic();}));
 $('volume').addEventListener('input',e=>{audio.volume=Number(e.target.value);persist();});$('mute').addEventListener('click',()=>{audio.muted=!audio.muted;renderTransport();});
 async function fullscreen(){try{if(document.fullscreenElement)await document.exitFullscreen();else if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();else notify('Use your browser’s View menu to enter full screen.');}catch{notify('Use your browser’s View menu to enter full screen.');}}
-$('fullscreen').addEventListener('click',fullscreen);document.addEventListener('fullscreenchange',()=>{$('fullscreen').setAttribute('aria-label',document.fullscreenElement?'Exit full screen':'Enter full screen');});
+if(navigator.standalone||matchMedia('(display-mode: standalone)').matches)$('fullscreen').hidden=true;$('fullscreen').addEventListener('click',fullscreen);document.addEventListener('fullscreenchange',()=>{$('fullscreen').setAttribute('aria-label',document.fullscreenElement?'Exit full screen':'Enter full screen');});
 document.addEventListener('keydown',e=>{if(e.altKey||e.ctrlKey||e.metaKey||$('settings').open||['INPUT','SELECT','TEXTAREA','BUTTON'].includes(e.target.tagName))return;if(e.code==='Space'){e.preventDefault();togglePlay();}else if(e.code==='ArrowLeft'){e.preventDefault();seek(state.position-5);}else if(e.code==='ArrowRight'){e.preventDefault();seek(state.position+5);}else if(e.key.toLowerCase()==='f')fullscreen();});
 audio.addEventListener('ended',()=>{state.position=state.duration;pause();renderTime();drawWave();});audio.addEventListener('error',()=>{if(state.source==='file'&&audio.getAttribute('src')){pause();notify('Audio playback failed. Load another supported audio file.');}});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){if(state.source==='file'&&!live.enabled)state.position=audio.currentTime;keepAwake();renderTime();drawWave();}});
@@ -227,6 +227,7 @@ function updateBridgeControls(){
  if(snapshot){
   $('receivePort').textContent=snapshot.receivePort;$('requestPort').textContent=snapshot.requestPort;
   $('receiveDestinations').textContent=(snapshot.destinations||['127.0.0.1']).join(' or ');
+  const pages=snapshot.pageUrls||[];$('pageDiagnostic').hidden=!pages.length;if(pages.length)$('pageDiagnostic').textContent=`Open on iPhone/iPad (same Wi-Fi): ${pages.join(' or ')}, then Share → Add to Home Screen.`;
   $('refreshLive').disabled=!snapshot.requestsEnabled;
   $('requestDiagnostic').textContent=snapshot.requestsEnabled?`State requests go to ${snapshot.requestHost}:${snapshot.requestPort}.`:'Passive reception: state requests are disabled. The sender must stream updates.';
   const sender=snapshot.lastSender?`${snapshot.lastSender.address}:${snapshot.lastSender.port}`:'none';

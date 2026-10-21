@@ -1,6 +1,6 @@
 # Maestro
 
-A local musician companion for a saxophonist. Run the browser on your Mac and move it to the iPad extended display.
+A local musician companion for a saxophonist. Run the browser on your Mac, or [install it on an iPhone or iPad](#install-on-iphone-or-ipad) as a home-screen app.
 
 ## Start
 
@@ -52,6 +52,18 @@ OSC_HOST=0.0.0.0 DJAY_HOST='' npm --prefix client start
 
 An empty `DJAY_HOST` disables outgoing state requests and **Refresh state**. The colleague must stream updates. If his sender supports `/djay/request/dumpAll`, set `DJAY_HOST` to his IPv4 address and `DJAY_PORT` to his incoming request port (default 9001). The normal local launch keeps requesting state from `127.0.0.1:9001`.
 
+## Install on iPhone or iPad
+
+The iPhone or iPad shows the page. The Node server keeps running on a Mac on the same Wi-Fi, because iOS can't receive djay's UDP OSC. That Mac can be the DJ's Mac beside djay; the Maestro Cue plugin's default `127.0.0.1:9000` then works unchanged.
+
+1. Connect the Mac and the iPhone/iPad to the same Wi-Fi.
+2. Stop any running server. In VS Code, select **Run client — iPhone/iPad** and press **F5**, or run `npm --prefix client run start:lan`. If macOS asks whether Node can accept incoming connections, choose **Allow**.
+3. The terminal prints `Open on iPhone/iPad: http://<mac-ip>:4173`. The address also appears under **OSC connection setup & diagnostics**. Open it in **Safari** on the device.
+4. Tap **Share → Add to Home Screen → Add**. Launch Maestro from its icon: it opens full screen without Safari's toolbars.
+5. Keep the screen on during a set: Settings → Display & Brightness → **Auto-Lock → Never** (or use Guided Access). Browsers only allow a page to hold the screen awake over HTTPS, and this local server is plain HTTP.
+
+If the Mac's Wi-Fi address changes, open the new address in Safari and add it to the Home Screen again. In this mode, anyone on the same Wi-Fi can open the page and see the live track data. Requests for other host names are refused, and the default `npm --prefix client start` remains reachable only from the Mac itself.
+
 ## Add a live waveform
 
 OSC does **not** transmit waveform samples or build/drop locations.
@@ -86,7 +98,7 @@ Run `npm test` for parser/reducer and isolated loopback bridge tests. Tests use 
 - `app.js`, `index.html`, `styles.css`: stage display, rehearsal and live modes.
 - `music.js`: instrument transposition and time/beat helpers.
 
-Default ports can be changed with `PORT`, `OSC_PORT`, and `DJAY_PORT`. `OSC_HOST` controls the UDP bind address (default `127.0.0.1`); `DJAY_HOST` controls the request destination (default `127.0.0.1`, empty disables requests); the in-app diagnostics show the effective values. Only one server should own the production UDP receiver. No cloud hosting, analytics, or external dependencies.
+Default ports can be changed with `PORT`, `OSC_PORT`, and `DJAY_PORT`. `HTTP_HOST=0.0.0.0` serves the page to other devices on the Wi-Fi (default `127.0.0.1`). `OSC_HOST` controls the UDP bind address (default `127.0.0.1`); `DJAY_HOST` controls the request destination (default `127.0.0.1`, empty disables requests); the in-app diagnostics show the effective values. Only one server should own the production UDP receiver. No cloud hosting, analytics, or external dependencies.
 
 ## Appearance
 
