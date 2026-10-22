@@ -199,6 +199,8 @@ kbd{font:700 11px/1 Arial,sans-serif;letter-spacing:.14em;color:var(--muted);tex
 .section-head{display:grid;gap:14px;max-width:760px;margin-bottom:48px}
 .section-head h2,.split-card h2,.audience h2,.final h2{font:700 clamp(30px,4.4vw,52px)/1.08 Arial,Helvetica,sans-serif;letter-spacing:-.03em}
 .eyebrow.accent{color:var(--accent)}
+/* Section labels read larger than the app-sized eyebrows inside the demo. */
+.section-head .eyebrow,.split-card .eyebrow,.audience .eyebrow{font-size:15px;letter-spacing:.12em}
 .band{padding:32px 0 0}
 .split{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .split-card{padding:clamp(28px,4vw,48px);border-radius:24px;border:1px solid color-mix(in srgb,var(--line) 35%,transparent);display:grid;gap:16px;align-content:start}
