@@ -28,6 +28,7 @@ h1,h2,h3,p,ol,ul,figure{margin:0}
 .slide-title{align-items:center;text-align:center;gap:34px}
 .slide-title h1{font:700 112px/1.04 Arial,Helvetica,sans-serif;letter-spacing:-.035em}
 .team{font-size:34px;color:var(--muted)}
+.event{font:700 22px/1 Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
 
 /* 2 · Problem */
 .pains{list-style:none;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:20px}

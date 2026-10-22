@@ -23,6 +23,7 @@ const shared = {
 await rm(out, {recursive: true, force: true});
 await mkdir(join(out, 'shared'), {recursive: true});
 for (const file of pages) await cp(join(site, file), join(out, file));
+await cp(join(site, 'assets'), join(out, 'assets'), {recursive: true});
 for (const [name, source] of Object.entries(shared)) await cp(join(root, source), join(out, 'shared', name));
 // GitHub Pages would otherwise run Jekyll over the output.
 await writeFile(join(out, '.nojekyll'), '');
