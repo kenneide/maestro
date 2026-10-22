@@ -21,6 +21,7 @@
   <h1>Live key, beat and cues<br><span class="accent">from DJ to musician.</span></h1>
   <p class="team">Alex Gaber · Alan O Cinneide</p>
   <p class="event">Official ADE Lab Hackathon 2026</p>
+  <div class="event-logos"><img class="ade-logo" src="assets/ade-logo.svg" alt="ADE"><span class="mhs-logo" role="img" aria-label="Music Hackspace"></span></div>
   <aside class="notes">Hi, we're Alex and Alan. This is Maestro: live key, beat and cues from the DJ to the musician playing beside them.</aside>
  </section>
 
@@ -30,7 +31,7 @@
   <ul class="pains">
    <li><b>New key</b><span>every time the DJ mixes</span></li>
    <li><b>Tempo &amp; drops</b><span>shift without warning</span></li>
-   <li><b>Cues</b><span>are a nod across a dark stage</span></li>
+   <li><b>Cues</b><span>are a nod across a dark, loud stage</span></li>
   </ul>
   <aside class="notes">DJs with a live sax, violin or trumpet are everywhere now. But the musician is guessing. Every mix changes the key and the tempo, and their only cue is a nod across a dark, loud stage.</aside>
  </section>
@@ -47,22 +48,11 @@
   <ol class="flow">
    <li class="flow-card"><span class="flow-step">djay Pro</span><div class="flow-art deck-art" aria-hidden="true"><i></i><i></i></div><p>Streams track, key, tempo and position over OSC</p></li>
    <li class="flow-arrow" aria-hidden="true"></li>
-   <li class="flow-card"><span class="flow-step">Maestro Cue plugin</span><div class="flow-art cue-art" aria-hidden="true"><span class="lamp ready"></span><b>Ready</b></div><p>DJ taps Stop, Ready, Play. Audio untouched</p></li>
+   <li class="flow-card"><span class="flow-step">Maestro Cue plugin</span><div class="flow-art cue-art" aria-hidden="true"><span class="lamp ready"></span><b>Ready</b></div><p>DJ taps Stop / Ready / Play to send cues, also over OSC</p></li>
    <li class="flow-arrow" aria-hidden="true"></li>
-   <li class="flow-card"><span class="flow-step">Musician's phone</span><div class="flow-art key-art" aria-hidden="true"><b>C♯</b><span>minor</span></div><p>Key in their instrument, beat, waveform, cue</p></li>
+   <li class="flow-card"><span class="flow-step">Musician's device</span><div class="flow-art device-art" aria-hidden="true"><div class="device-cue"><span class="lamp play"></span><b>Play</b></div><div class="device-key"><b>B<svg class="flat" viewBox="0 0 40 100"><path d="M8 4V94C24 84 37 71 34 59C31 48 17 47 8 60"/></svg></b><span>major</span></div></div><p>Key in their instrument, beat, waveform, cue</p></li>
   </ol>
-  <aside class="notes">djay Pro streams what's playing over OSC. Our plugin sits in djay, where the DJ taps Stop, Ready or Play. The musician's phone shows the key in their instrument, the beat, and the cue, in a fraction of a beat.</aside>
- </section>
-
- <section class="slide slide-demo" data-time="75" data-criteria="clarity artistic" aria-label="Live demo">
-  <p class="kicker live"><span class="rec" aria-hidden="true"></span>Live demo</p>
-  <h2>Watch for three things.</h2>
-  <ol class="watch">
-   <li><span class="watch-num">1</span><div class="watch-art"><span class="from">E minor</span><span class="arrow" aria-hidden="true">→</span><b>C♯ minor</b></div><p>The key appears <b>transposed for alto sax</b></p></li>
-   <li><span class="watch-num">2</span><div class="watch-art"><span class="lamp ready"></span><b class="amber">Ready</b></div><p>The DJ warns on the <b>build</b></p></li>
-   <li><span class="watch-num">3</span><div class="watch-art"><span class="lamp play"></span><b class="green">Play</b></div><p>On the <b>drop</b>, the musician comes in, in key</p></li>
-  </ol>
-  <aside class="notes">[10 s] Watch for three things: the key, transposed for our sax player; Ready from the DJ on the build; and Play on the drop, when the sax comes in. [Switch to the rig, 65 s] DJ: start Heart Like Mine in the breakdown on Stop. Point at the phone: C sharp minor. At the build, tap Ready. On the drop, tap Play. The sax comes in. Let it play about 20 seconds, then tap Ready, then Stop.</aside>
+  <aside class="notes">djay Pro streams what's playing over OSC. Our plugin sits in djay, where the DJ taps Stop, Ready or Play to send cues, also over OSC. The musician's device shows the key in their instrument, the beat, and the cue, in a fraction of a beat.</aside>
  </section>
 
  <section class="slide" data-time="20" data-criteria="artistic" aria-label="Artistic potential">
@@ -80,11 +70,22 @@
   <p class="kicker">Who it's for</p>
   <h2>Every DJ who plays with a live musician.</h2>
   <div class="market">
-   <div class="market-col"><h3>Who</h3><ul class="chips"><li>DJ + sax / violin / trumpet acts</li><li>Clubs &amp; residencies</li><li>Hotels &amp; rooftops</li><li>Weddings &amp; events</li></ul></div>
+   <div class="market-col"><h3>Who</h3><ul class="chips"><li>DJ + live musicians</li><li>Clubs &amp; residencies</li><li>Hotels &amp; rooftops</li><li>Weddings &amp; events</li></ul></div>
    <div class="market-col"><h3>Model</h3><p class="big-line"><b>Free</b> musician app</p><p class="big-line"><b>Paid</b> djay Pro plugin</p></div>
    <div class="market-col"><h3>Fits today's rig</h3><p class="big-line">Built on <b>djay Pro</b></p><p class="big-line"><b>No</b> new hardware</p></div>
   </div>
   <aside class="notes">It's for every DJ who plays with a live musician: clubs, hotels, weddings. The musician app is free, the plugin is paid, and it fits the djay Pro rig they already have. No new hardware.</aside>
+ </section>
+
+ <section class="slide slide-demo" data-time="75" data-criteria="clarity artistic" aria-label="Live demo">
+  <p class="kicker live"><span class="rec" aria-hidden="true"></span>Live demo</p>
+  <h2>Watch for three things.</h2>
+  <ol class="watch">
+   <li><span class="watch-num">1</span><div class="watch-art"><span class="from">E minor</span><span class="arrow" aria-hidden="true">→</span><b>C♯ minor</b></div><p>The key appears <b>transposed for alto sax</b></p></li>
+   <li><span class="watch-num">2</span><div class="watch-art"><span class="lamp ready"></span><b class="amber">Ready</b></div><p>The DJ warns on the <b>build</b></p></li>
+   <li><span class="watch-num">3</span><div class="watch-art"><span class="lamp play"></span><b class="green">Play</b></div><p>On the <b>drop</b>, the musician comes in, in key</p></li>
+  </ol>
+  <aside class="notes">[10 s] Let's show you. Watch for three things: the key, transposed for our sax player; Ready from the DJ on the build; and Play on the drop, when the sax comes in. [Switch to the rig, 65 s] DJ: start Heart Like Mine in the breakdown on Stop. Point at the phone: C sharp minor. At the build, tap Ready. On the drop, tap Play. The sax comes in. Let it play about 20 seconds, then tap Ready, then Stop.</aside>
  </section>
 
  <section class="slide slide-close" data-time="5" data-criteria="fit originality artistic clarity" aria-label="Thank you">

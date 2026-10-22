@@ -29,6 +29,9 @@ h1,h2,h3,p,ol,ul,figure{margin:0}
 .slide-title h1{font:700 112px/1.04 Arial,Helvetica,sans-serif;letter-spacing:-.035em}
 .team{font-size:34px;color:var(--muted)}
 .event{font:700 22px/1 Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.event-logos{display:flex;align-items:center;justify-content:center;gap:40px;margin-top:-6px}
+.event-logos .ade-logo{display:block;width:72px;height:72px;filter:invert(1)}
+.event-logos .mhs-logo{display:block;width:91px;height:72px;background:var(--ink);-webkit-mask:url(assets/music-hackspace-logo.svg) center/contain no-repeat;mask:url(assets/music-hackspace-logo.svg) center/contain no-repeat}
 
 /* 2 · Problem */
 .pains{list-style:none;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:20px}
@@ -51,9 +54,16 @@ h1,h2,h3,p,ol,ul,figure{margin:0}
 .flow-arrow::after{content:"";position:absolute;right:8px;top:calc(50% - 13px);border:13px solid transparent;border-left:18px solid var(--accent)}
 .deck-art i{width:96px;height:96px;border-radius:50%;border:3px solid var(--line);background:conic-gradient(var(--raised),var(--surface))}
 .cue-art b{font-size:60px;color:var(--cue-amber)}
-.key-art{align-items:baseline}
-.key-art b{font-size:110px}
-.key-art span{font-size:40px}
+/* A mini musician screen: the cue above the key, centred. */
+.device-art{flex-direction:column;gap:6px}
+.device-cue{display:flex;align-items:center;gap:14px;color:var(--cue-green)}
+.device-cue .lamp{width:34px;height:34px}
+.device-cue b{font-size:44px;line-height:1}
+.device-key{display:flex;align-items:baseline;justify-content:center;gap:12px}
+.device-key b{font-size:72px;line-height:1}
+/* Arial has no flat sign, so draw one at the cue type's weight. */
+.flat{width:.4em;height:.92em;margin-left:.04em;fill:none;stroke:currentColor;stroke-width:9;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.02em}
+.device-key span{font-size:32px}
 .lamp{display:inline-block;width:72px;height:72px;border-radius:50%;flex-shrink:0}
 .lamp.ready{background:var(--cue-amber-fill);box-shadow:0 0 40px color-mix(in srgb,var(--cue-amber-fill) 70%,transparent)}
 .lamp.play{background:var(--cue-green-fill);box-shadow:0 0 40px color-mix(in srgb,var(--cue-green-fill) 70%,transparent)}
