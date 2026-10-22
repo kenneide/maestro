@@ -236,7 +236,7 @@ kbd{font:700 11px/1 Arial,sans-serif;letter-spacing:.14em;color:var(--muted);tex
 .feature-icon{width:44px;height:44px;border-radius:12px;background:var(--raised);display:grid;place-items:center;margin-bottom:6px}
 .feature-icon svg{width:24px;height:24px;fill:none;stroke:var(--accent);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .feature-icon .fill{fill:var(--accent)}
-.feature-icon.cues{display:flex;gap:5px}
+.feature-icon.cues{display:flex;align-items:center;justify-content:center;gap:5px}
 .feature-icon.cues i{width:9px;height:9px;border-radius:50%}
 .feature-icon.cues i:nth-child(1){background:var(--cue-red-fill)}
 .feature-icon.cues i:nth-child(2){background:var(--cue-amber-fill)}
