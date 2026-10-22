@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node build.mjs",
     "start": "node build.mjs && node serve.mjs",
-    "check": "node --check build.mjs && node --check serve.mjs && node --check main.js && node --check demo.js"
+    "check": "node --check build.mjs && node --check serve.mjs && node --check main.js && node --check demo.js && node --check present.js"
   },
   "engines": {
     "node": ">=18"

@@ -1,0 +1,134 @@
+/* Maestro pitch deck. A fixed 1920x1080 stage scaled to the screen; tokens from shared/tokens.css. */
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#000;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3,p,ol,ul,figure{margin:0}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.accent{color:var(--accent)}
+.mark{display:inline-block;width:40px;height:40px;background:var(--accent);-webkit-mask:url(shared/mark.svg) center/contain no-repeat;mask:url(shared/mark.svg) center/contain no-repeat}
+.mark.xl{width:150px;height:150px}
+.lockup{display:inline-flex;align-items:center;gap:16px;font:700 30px/1 Arial,sans-serif;letter-spacing:.2em}
+.lockup.big{font-size:44px;letter-spacing:.24em}
+
+/* Stage: scaled by present.js via --scale. */
+.stage{position:fixed;left:50%;top:50%;width:1920px;height:1080px;transform:translate(-50%,-50%) scale(var(--scale,1));background:var(--bg);overflow:hidden}
+.stage::before{content:"";position:absolute;inset:-30% 10% auto;height:1100px;background:radial-gradient(closest-side,color-mix(in srgb,var(--accent) 20%,transparent),transparent);pointer-events:none}
+.deck{position:absolute;inset:0 0 96px}
+.slide{position:absolute;inset:0;padding:110px 140px 40px;display:flex;flex-direction:column;justify-content:center;gap:40px}
+.js .slide{opacity:0;visibility:hidden;transition:opacity .35s ease,visibility 0s .35s}
+.js .slide.active{opacity:1;visibility:visible;transition:opacity .35s ease}
+.slide h2{font:700 76px/1.08 Arial,Helvetica,sans-serif;letter-spacing:-.025em;max-width:1500px}
+.slide h2.huge{font-size:120px;line-height:1.02}
+.kicker{font:700 26px/1 Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+
+/* Criterion chips, top right of each slide (rendered from data-criteria). */
+.chips-crit{position:absolute;top:56px;right:140px;display:flex;gap:12px}
+.chips-crit span{padding:10px 18px;border-radius:999px;border:2px solid var(--accent);color:var(--accent);font:700 18px/1 Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;background:color-mix(in srgb,var(--accent) 12%,transparent)}
+
+/* 1 · Title */
+.slide-title{align-items:center;text-align:center;gap:34px}
+.slide-title h1{font:700 112px/1.04 Arial,Helvetica,sans-serif;letter-spacing:-.035em}
+.team{font-size:34px;color:var(--muted)}
+
+/* 2 · Problem */
+.pains{list-style:none;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:20px}
+.pains li{padding:32px 36px;border-radius:24px;background:var(--surface);border:1px solid color-mix(in srgb,var(--line) 35%,transparent);display:grid;gap:8px}
+.pains b{font:700 40px/1.1 Arial,sans-serif}
+.pains span{font-size:28px;color:var(--muted)}
+
+/* 3 · Value proposition */
+.statement{font-size:96px!important;line-height:1.1!important;max-width:1600px!important}
+.statement em{font-style:normal;color:var(--accent);text-decoration:underline;text-decoration-thickness:8px;text-underline-offset:14px}
+
+/* 4 · How it works */
+.flow{list-style:none;padding:0;display:grid;grid-template-columns:1fr 90px 1fr 90px 1fr;align-items:stretch;margin-top:10px}
+.flow-card{padding:34px;border-radius:28px;background:var(--surface);border:1px solid color-mix(in srgb,var(--line) 35%,transparent);display:grid;gap:22px;align-content:start}
+.flow-step{font:700 34px/1.1 Arial,sans-serif}
+.flow-card p{font-size:26px;color:var(--muted);line-height:1.35}
+.flow-art{height:180px;border-radius:20px;background:var(--bg);display:flex;align-items:center;justify-content:center;gap:20px;font-family:Arial,sans-serif}
+.flow-arrow{position:relative}
+.flow-arrow::before{content:"";position:absolute;left:14px;right:22px;top:50%;border-top:5px dotted var(--accent)}
+.flow-arrow::after{content:"";position:absolute;right:8px;top:calc(50% - 13px);border:13px solid transparent;border-left:18px solid var(--accent)}
+.deck-art i{width:96px;height:96px;border-radius:50%;border:3px solid var(--line);background:conic-gradient(var(--raised),var(--surface))}
+.cue-art b{font-size:60px;color:var(--cue-amber)}
+.key-art{align-items:baseline}
+.key-art b{font-size:110px}
+.key-art span{font-size:40px}
+.lamp{display:inline-block;width:72px;height:72px;border-radius:50%;flex-shrink:0}
+.lamp.ready{background:var(--cue-amber-fill);box-shadow:0 0 40px color-mix(in srgb,var(--cue-amber-fill) 70%,transparent)}
+.lamp.play{background:var(--cue-green-fill);box-shadow:0 0 40px color-mix(in srgb,var(--cue-green-fill) 70%,transparent)}
+
+/* 5 · Live demo */
+.kicker.live{display:inline-flex;align-items:center;gap:14px;color:var(--ink)}
+.rec{width:20px;height:20px;border-radius:50%;background:var(--cue-red-fill);animation:rec 1.2s ease-in-out infinite alternate}
+@keyframes rec{to{opacity:.35}}
+.watch{list-style:none;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.watch li{position:relative;padding:34px;border-radius:28px;background:var(--surface);border:1px solid color-mix(in srgb,var(--line) 35%,transparent);display:grid;gap:24px;align-content:start}
+.watch-num{position:absolute;top:-22px;left:30px;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--on-accent);font:700 28px/1 Arial,sans-serif}
+.watch-art{white-space:nowrap;height:170px;border-radius:20px;background:var(--bg);display:flex;align-items:center;justify-content:center;gap:22px;font-family:Arial,sans-serif}
+.watch-art .from{font-size:32px;color:var(--muted)}
+.watch-art .arrow{font-size:32px;color:var(--muted)}
+.watch-art b{font-size:54px}
+.watch li:first-child .watch-art{gap:14px}
+.watch li:first-child .watch-art b{font-size:46px}
+.watch-art .amber{color:var(--cue-amber)}
+.watch-art .green{color:var(--cue-green)}
+.watch p{font-size:30px;line-height:1.3;color:var(--muted)}
+.watch p b{color:var(--ink)}
+
+/* 6 · Artistic potential */
+.cards.three{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.card{padding:40px;border-radius:28px;background:linear-gradient(150deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface));border:1px solid color-mix(in srgb,var(--line) 35%,transparent);display:grid;gap:16px;align-content:start}
+.card h3{font:700 42px/1.1 Arial,sans-serif}
+.card p{font-size:28px;line-height:1.35;color:var(--muted)}
+
+/* 7 · Market */
+.market{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:28px}
+.market-col{padding:38px;border-radius:28px;background:var(--surface);border:1px solid color-mix(in srgb,var(--line) 35%,transparent);display:grid;gap:18px;align-content:start}
+.market-col h3{font:700 22px/1 Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.chips{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:12px}
+.chips li{padding:12px 20px;border-radius:999px;background:var(--raised);font-size:26px}
+.big-line{font-size:36px;color:var(--muted)}
+.big-line b{color:var(--ink)}
+
+/* 8 · Close */
+.slide-close{flex-direction:row;align-items:center;justify-content:space-between;gap:80px}
+.close-copy{display:grid;gap:36px}
+.close-copy h2{font-size:104px}
+.codes{display:flex;gap:44px}
+.codes figure{display:grid;justify-items:center;gap:18px}
+.qr{width:300px;height:300px;border-radius:18px}
+.codes figcaption{font:700 28px/1 Arial,sans-serif;letter-spacing:.06em}
+
+/* Criteria legend, always visible; the current slide's criteria light up. */
+.legend{position:absolute;left:0;right:0;bottom:0;height:96px;display:flex;align-items:center;justify-content:center;gap:16px;border-top:1px solid color-mix(in srgb,var(--line) 35%,transparent);background:color-mix(in srgb,var(--surface) 70%,var(--bg))}
+.legend span{padding:12px 22px;border-radius:999px;font:700 20px/1 Arial,sans-serif;letter-spacing:.06em;color:var(--muted);opacity:.55;border:2px solid transparent;transition:all .3s}
+.legend span b{margin-left:8px;font-size:16px;color:inherit;opacity:.8}
+.legend span.on{opacity:1;color:var(--accent);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+
+/* Presenter HUD */
+.hud{position:absolute;top:56px;left:140px;display:flex;gap:14px;font:700 22px/1 Arial,sans-serif;color:var(--muted)}
+.counter{padding:10px 0}
+.timer{padding:10px 16px;border-radius:999px;background:var(--raised);color:var(--ink);font-variant-numeric:tabular-nums}
+.timer.warn{background:var(--cue-amber-fill);color:var(--cue-on-fill)}
+.timer.over{background:var(--cue-red-fill);color:var(--cue-on-fill)}
+.notes-panel{position:fixed;left:16px;right:16px;bottom:16px;z-index:5;max-width:1100px;margin:0 auto;padding:18px 22px;border-radius:14px;background:rgba(10,10,14,.94);border:1px solid var(--line);color:#f3f2f7;font-size:18px;line-height:1.5;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.notes-panel span{display:block;margin-top:8px;font-size:13px;color:#aaa8b9}
+.help{position:fixed;left:50%;top:10px;transform:translateX(-50%);margin:0;font-size:12px;color:#77758a;transition:opacity .6s;pointer-events:none}
+.help.hide{opacity:0}
+.notes{display:none}
+
+/* Overview (Esc): every slide with its timing and criteria. */
+.overview{position:absolute;inset:0 0 96px;z-index:4;padding:110px 140px 40px;background:color-mix(in srgb,var(--bg) 96%,transparent);display:grid;grid-template-columns:repeat(4,1fr);gap:24px;align-content:center}
+.overview[hidden]{display:none}
+.overview button{display:grid;gap:12px;align-content:start;text-align:left;min-height:200px;padding:26px;border-radius:20px;border:2px solid color-mix(in srgb,var(--line) 40%,transparent);background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}
+.overview button.current{border-color:var(--accent)}
+.overview .ov-num{font:700 20px/1 Arial,sans-serif;color:var(--muted)}
+.overview .ov-title{font:700 32px/1.15 Arial,sans-serif}
+.overview .ov-meta{font-size:18px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+
+/* Without scripts, slides simply stack. */
+html:not(.js) .stage{position:static;transform:none;width:auto;height:auto}
+html:not(.js) .deck,html:not(.js) .slide{position:relative;inset:auto}
+html:not(.js) .slide{min-height:100vh}
+html:not(.js) .legend,html:not(.js) .hud,html:not(.js) .help{display:none}
+@media(prefers-reduced-motion:reduce){.js .slide{transition:none}.rec{animation:none}}

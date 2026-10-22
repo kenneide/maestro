@@ -8,7 +8,7 @@ const site = dirname(fileURLToPath(import.meta.url));
 const root = join(site, '..');
 const out = join(site, '_site');
 
-const pages = ['index.html', 'styles.css', 'main.js', 'demo.js'];
+const pages = ['index.html', 'styles.css', 'main.js', 'demo.js', 'present.html', 'present.css', 'present.js', 'judges.html'];
 const shared = {
   'tokens.css': 'design/generated/tokens.css',
   'mark.svg': 'design/mark.svg',
