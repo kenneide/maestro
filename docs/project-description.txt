@@ -1,9 +1,7 @@
-Project Description
+Live key, beat and cues from DJ to musician.
 
-DJ's adding a live musician (saxophone, violin, trumpet, etc) is increasingly common across the globe.
+More and more DJs perform with a live musician: saxophone, violin, trumpet and more. But the musician is usually playing by ear. They have to keep up as the DJ mixes into tracks in new keys and tempos, with different build-and-drop structures. Their only guide is a nod or a hand signal from the booth.
 
-For the musician, they need to "keep up" with the DJ mixing and transitioning to new tracks that are in different keys, have different rhythms, and varying build -> drop patterns.
+djay Pro Maestro gives the musician their own live view of the set. A web app, running on a laptop or installed on an iPhone or iPad with a QR code, shows the current track's key transposed for the musician's instrument. It also shows tempo, bar and beat, a live scrolling waveform, and a preview of the track on the other deck.
 
-Musicians mostly improvise on the spot, playing by ear, and taking stage cues from the DJ for when and what to play.
-
-To greatly improve the DJ - Musician interaction, djay Pro Maestro is a plugin and web client that provides the musician a separate interface to give them visibility to the key of the track, the upcoming tracks, and performance cues (red light/green light).
+In the booth, the Maestro Cue plugin for djay Pro lets the DJ step a stage light through Stop, Ready and Play. The cue appears on the musician's screen right away, or fills the screen in traffic light mode. The musician knows what key to play in and when to come in.
