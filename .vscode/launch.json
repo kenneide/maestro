@@ -18,6 +18,27 @@
       }
     },
     {
+      "name": "Run website",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "site",
+        "start"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "serverReadyAction": {
+        "pattern": "Maestro site: (http://localhost:[0-9]+/)",
+        "uriFormat": "%s",
+        "action": "openExternally"
+      }
+    },
+    {
       "name": "Run client — Wi-Fi",
       "type": "node",
       "request": "launch",

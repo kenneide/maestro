@@ -30,3 +30,6 @@ xcuserdata/
 
 # Website build output
 /site/_site/
+
+# Local audio files (not for distribution)
+/audio/
