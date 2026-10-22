@@ -1,5 +1,7 @@
 # Maestro
 
+For the complete DJ Mac and musician phone setup, including plugin QR codes and troubleshooting, see the [technical setup guide](../docs/setup-guide.md).
+
 A local musician companion for performing musicians. Run the browser on your Mac, or [install it on an iPhone or iPad](#install-on-iphone-or-ipad) as a home-screen app.
 
 ## Start

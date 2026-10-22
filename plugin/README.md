@@ -1,5 +1,7 @@
 # Maestro Cue
 
+For the complete setup, including the required Mac bridge and phone access through the plugin QR, see the [technical setup guide](../docs/setup-guide.md).
+
 An Audio Unit effect for djay Pro that sends performance cues to the musician. The DJ steps a red/amber/green light through Stop → Ready → Play → Ready → Stop. Click the cue panel or press Space to take the next step, or use the STOP / READY / PLAY buttons to jump straight to a cue. READY warns of a change towards Stop while playing, otherwise towards Play. The plugin sends it over OSC to the [Maestro client](../client/README.md), which shows it on stage. Audio passes through unchanged.
 
 ## Build

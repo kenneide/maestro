@@ -46,6 +46,8 @@ Open http://localhost:4180. The live demo is a simulated set; no djay connection
 
 ## Project docs
 
+- [Technical setup guide](docs/setup-guide.md): bridge startup, plugin QR codes, phone access and troubleshooting.
+- [Next steps](docs/next-steps.md): shipping the bridge as a companion app the plugin can start, release housekeeping, lower cue latency.
 - [Project description](docs/project-description.txt)
 - [djay Pro OSC specification v4](docs/djay-pro-osc-specification-v4.pdf)
 
