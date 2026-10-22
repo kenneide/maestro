@@ -212,7 +212,6 @@ kbd{font:700 11px/1 Arial,sans-serif;letter-spacing:.14em;color:var(--muted);tex
 .step{position:relative;padding:28px;border-radius:24px;background:var(--surface);border:1px solid color-mix(in srgb,var(--line) 30%,transparent);display:grid;gap:12px;align-content:start}
 .step h3{font-size:21px}
 .step p{color:var(--muted);font-size:15px}
-.step-num{position:absolute;top:22px;right:24px;font:700 14px/1 Arial,sans-serif;color:var(--muted)}
 .step-art{height:150px;border-radius:16px;background:var(--bg);display:grid;place-items:center;margin-bottom:8px;overflow:hidden}
 .mini-deck{display:flex;align-items:center;gap:14px}
 .mini-deck span{width:58px;height:58px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font:700 14px Arial,sans-serif;color:var(--muted);animation:spin 4s linear infinite;background:conic-gradient(from 0deg,var(--raised),var(--surface))}
@@ -222,9 +221,7 @@ kbd{font:700 11px/1 Arial,sans-serif;letter-spacing:.14em;color:var(--muted);tex
 .mini-plugin{display:flex;align-items:center;gap:14px;padding:16px 22px;border-radius:14px;border:2px solid var(--cue-amber);background:var(--raised);font-family:Arial,sans-serif;color:var(--cue-amber);font-size:26px}
 .mini-plugin .lamp{width:34px;height:34px;--fill:var(--cue-amber-fill);animation:glow 1.4s ease-in-out infinite alternate}
 @keyframes glow{to{box-shadow:0 0 8px color-mix(in srgb,var(--cue-amber-fill) 40%,transparent);opacity:.7}}
-.mini-qr{display:grid;grid-template-columns:repeat(2,34px);gap:10px;padding:14px;background:#fff;border-radius:12px}
-.mini-qr i{width:34px;height:34px;border:6px solid #111;border-radius:4px}
-.mini-qr i:nth-child(4){border:0;background:repeating-linear-gradient(90deg,#111 0 6px,transparent 6px 10px),repeating-linear-gradient(0deg,#111 0 6px,transparent 6px 10px);background-blend-mode:multiply;opacity:.85}
+.mini-qr{width:118px;height:118px;border-radius:10px}
 @media(max-width:860px){.steps{grid-template-columns:1fr}}
 
 .features{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
