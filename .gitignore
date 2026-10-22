@@ -27,3 +27,6 @@ xcuserdata/
 /client/outputs/
 /client/work/
 .vscode/settings.json
+
+# Website build output
+/site/_site/

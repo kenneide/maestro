@@ -1,0 +1,14 @@
+{
+  "name": "maestro-site",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "node build.mjs",
+    "start": "node build.mjs && node serve.mjs",
+    "check": "node --check build.mjs && node --check serve.mjs && node --check main.js && node --check demo.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

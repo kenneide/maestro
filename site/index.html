@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Maestro · Live key, beat and cues from DJ to musician</title>
+<meta name="description" content="Maestro gives the live musician beside a DJ their own view of the set: the key transposed for their instrument, tempo, beat, waveform, the next track, and Stop / Ready / Play cues sent from djay Pro.">
+<meta name="theme-color" content="#111115">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Maestro · Live key, beat and cues from DJ to musician">
+<meta property="og:description" content="A djay Pro plugin and musician companion app for DJs who perform with live players.">
+<meta property="og:image" content="https://kenneide.github.io/maestro/shared/cover.png">
+<meta property="og:url" content="https://kenneide.github.io/maestro/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="shared/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="shared/icon-180.png">
+<script src="shared/theme.js"></script>
+<script>document.documentElement.classList.add('js')</script>
+<link rel="stylesheet" href="shared/tokens.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav" id="top">
+ <div class="wrap nav-inner">
+  <a class="lockup" href="#top" aria-label="Maestro home"><span class="mark" aria-hidden="true"></span>MAESTRO</a>
+  <nav class="nav-links" aria-label="Sections">
+   <a href="#how">How it works</a><a href="#features">Features</a><a href="#musicians">For musicians</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a>
+  </nav>
+  <div class="nav-actions">
+   <button id="themeToggle" class="icon-btn" type="button" aria-label="Switch to light mode" title="Switch to light mode">
+    <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>
+    <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></svg>
+   </button>
+   <a class="btn btn-primary btn-small" href="#pricing">Get Maestro</a>
+  </div>
+ </div>
+</header>
+
+<main id="main">
+ <section class="hero">
+  <div class="wrap hero-copy">
+   <p class="pill"><span class="dot" aria-hidden="true"></span>Works with djay Pro</p>
+   <h1>Live key, beat and cues<br><span class="accent">from DJ to musician.</span></h1>
+   <p class="lead">Maestro gives the sax, violin or trumpet player beside the DJ their own live view of the set: the key transposed for their instrument, the beat, and a cue light that tells them when to come in.</p>
+   <div class="cta-row">
+    <a class="btn btn-primary" href="#demo">Try the live demo</a>
+    <a class="btn btn-ghost" href="#how">See how it works</a>
+   </div>
+  </div>
+
+  <div class="wrap" id="demo">
+   <div class="stage" aria-label="Interactive demo">
+    <div class="stage-halo" aria-hidden="true"></div>
+
+    <div class="stage-col">
+     <p class="stage-label">In the DJ booth · djay Pro</p>
+     <div class="plugin" id="plugin">
+      <div class="plugin-head"><span class="mark small" aria-hidden="true"></span><b>MAESTRO</b><span class="slash">/</span><small>CUE</small></div>
+      <button class="plugin-cue" id="pluginCue" type="button" data-cue="stop" aria-describedby="pluginHint">
+       <span class="lamp" aria-hidden="true"></span>
+       <span class="plugin-cue-text"><strong id="pluginWord">Stop</strong><small id="pluginNext"></small></span>
+       <kbd>Space</kbd>
+      </button>
+      <p class="plugin-hint" id="pluginHint">Click or press Space to send the next cue</p>
+      <div class="plugin-steps" aria-hidden="true"><span data-step="stop">STOP</span><span data-step="ready">READY</span><span data-step="play">PLAY</span></div>
+      <div class="plugin-send"><span>SEND TO</span><code>127.0.0.1 : 9000</code></div>
+     </div>
+     <div class="timeline" aria-hidden="true">
+      <div class="timeline-head"><span id="sectionName">Breakdown</span><span id="deckName">Deck 1</span></div>
+      <div class="timeline-bar" id="timelineBar"></div>
+     </div>
+    </div>
+
+    <div class="link" aria-hidden="true"><span class="link-line"></span><span class="link-tag">OSC</span><span class="link-pulse" id="linkPulse"></span></div>
+
+    <div class="stage-col phone-col">
+     <p class="stage-label">On stage · Musician</p>
+     <div class="phone" id="phone" data-cue="stop">
+      <div class="notch" aria-hidden="true"></div>
+      <div class="screen">
+       <div class="app-head"><span class="mark small" aria-hidden="true"></span><b>MAESTRO</b><span class="slash">/</span><small>MUSICIAN</small></div>
+       <section class="app-sec cue-sec">
+        <h3 class="eyebrow">CUE</h3>
+        <div class="cue-value"><strong id="phoneCue">Stop</strong><span id="phoneNext" class="cue-next"></span></div>
+       </section>
+       <section class="app-sec">
+        <h3 class="eyebrow">AUDIO</h3>
+        <p class="app-title" id="phoneTitle">Deck 1 · Heart Like Mine</p>
+        <p class="app-sub" id="phoneArtist">Sam Feldt</p>
+        <canvas id="phoneWave" class="app-wave"></canvas>
+        <div class="app-progress"><i id="phoneProgress"></i></div>
+        <div class="app-time"><span><span id="phoneTime">1:02</span> <span class="muted">/</span> <span id="phoneDuration">3:02</span></span><span class="muted" id="phoneStatus">Playing</span></div>
+        <p class="app-preview"><span id="phonePreview"></span><span id="phonePreviewDetails"></span></p>
+       </section>
+       <section class="app-sec music-sec">
+        <h3 class="eyebrow">MUSIC</h3>
+        <div class="music-row">
+         <div><div class="eyebrow small">KEY</div><div class="big-key"><span id="phoneKey">C♯</span> <span id="phoneMode">minor</span></div></div>
+         <div><div class="eyebrow small">BPM</div><div class="bpm" id="phoneBpm">124</div><div class="beat-dots" id="beatDots"><i></i><i></i><i></i><i></i></div></div>
+        </div>
+       </section>
+      </div>
+      <div class="traffic" aria-hidden="true"><strong id="trafficWord">Stop</strong><span id="trafficNext"></span></div>
+     </div>
+    </div>
+
+    <div class="controls">
+     <label class="control"><span>Instrument</span>
+      <select id="instrument">
+       <option value="C">C · piano, violin, flute</option>
+       <option value="Bb">B♭ · trumpet, tenor sax, clarinet</option>
+       <option value="Eb" selected>E♭ · alto sax</option>
+       <option value="F">F · French horn</option>
+      </select>
+     </label>
+     <p class="concert" id="concert">Concert E minor → you read <b>C♯ minor</b></p>
+     <label class="control switch-row"><span>Traffic light mode</span><input id="traffic" class="switch" type="checkbox" role="switch"></label>
+     <button class="icon-btn" id="playPause" type="button" aria-label="Pause demo" title="Pause demo">
+      <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg>
+      <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>
+     </button>
+    </div>
+    <p class="sr-only" id="announce" aria-live="polite"></p>
+   </div>
+   <p class="demo-note">Simulated set. Maestro follows the deck you're mixing into and sends cues on the drop.</p>
+  </div>
+ </section>
+
+ <section class="band reveal">
+  <div class="wrap split">
+   <div class="split-card before">
+    <p class="eyebrow">Without Maestro</p>
+    <h2>Playing by ear, watching for a nod.</h2>
+    <p>The DJ mixes into a new key, the tempo shifts, the drop lands two bars early. The musician guesses, and the crowd hears it.</p>
+   </div>
+   <div class="split-card after">
+    <p class="eyebrow accent">With Maestro</p>
+    <h2>Know the key. Know the cue.</h2>
+    <p>The key, the beat and what's coming next sit on a phone or iPad at the musician's feet, and the DJ cues them in with one tap.</p>
+   </div>
+  </div>
+ </section>
+
+ <section class="section" id="how">
+  <div class="wrap">
+   <header class="section-head reveal">
+    <p class="eyebrow accent">How it works</p>
+    <h2>From the booth to the stage in under a second.</h2>
+   </header>
+   <ol class="steps">
+    <li class="step reveal">
+     <span class="step-num">1</span>
+     <div class="step-art" aria-hidden="true"><div class="mini-deck"><span>A</span><i></i><span>B</span></div></div>
+     <h3>djay Pro shares the set</h3>
+     <p>djay Pro streams what's playing over OSC: track, key, tempo and position. Maestro listens and follows the deck you mix into.</p>
+    </li>
+    <li class="step reveal">
+     <span class="step-num">2</span>
+     <div class="step-art" aria-hidden="true"><div class="mini-plugin"><span class="lamp"></span><b>Ready</b></div></div>
+     <h3>The DJ cues with one tap</h3>
+     <p>The Maestro Cue plugin sits in djay's effects. Step the light through Stop, Ready and Play. Audio passes through untouched.</p>
+    </li>
+    <li class="step reveal">
+     <span class="step-num">3</span>
+     <div class="step-art" aria-hidden="true"><div class="mini-qr"><i></i><i></i><i></i><i></i></div></div>
+     <h3>The musician scans and plays</h3>
+     <p>Scan the QR code in the plugin and Maestro opens on the musician's phone or iPad. Add it to the home screen and it runs like an app.</p>
+    </li>
+   </ol>
+  </div>
+ </section>
+
+ <section class="section" id="features">
+  <div class="wrap">
+   <header class="section-head reveal">
+    <p class="eyebrow accent">Features</p>
+    <h2>Everything a live player needs. Nothing they don't.</h2>
+   </header>
+   <div class="features">
+    <article class="feature feature-wide reveal">
+     <div>
+      <h3>The key, in <em>your</em> key</h3>
+      <p>Choose your instrument once. Maestro transposes every track, so an alto player reads C♯ minor while the DJ plays E minor. It updates the moment the DJ mixes into the next track.</p>
+     </div>
+     <div class="transpose" aria-hidden="true">
+      <div><small>Concert</small><b>E</b><span>minor</span></div>
+      <svg viewBox="0 0 60 24"><path d="M2 12h52m-8-8 8 8-8 8"/></svg>
+      <div class="you"><small>E♭ alto sax</small><b>C♯</b><span>minor</span></div>
+     </div>
+    </article>
+    <article class="feature reveal">
+     <div class="feature-icon cues" aria-hidden="true"><i></i><i></i><i></i></div>
+     <h3>Stop · Ready · Play</h3>
+     <p>A three-state cue light from the DJ. Ready shows what's coming next, so nobody is caught off guard.</p>
+    </article>
+    <article class="feature reveal">
+     <div class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M2 12h2l2-6 3 12 3-9 2 6 2-3h6"/></svg></div>
+     <h3>Live waveform</h3>
+     <p>A scrolling waveform straight from the DJ's audio. See the build coming and feel where the drop lands.</p>
+    </article>
+    <article class="feature reveal">
+     <div class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2.6" class="fill"/></svg></div>
+     <h3>Tempo, bar and beat</h3>
+     <p>Live BPM and a four-beat counter, locked to djay, so you always know where "one" is.</p>
+    </article>
+    <article class="feature reveal">
+     <div class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h11M4 12h11M4 17h7"/><path d="m17 14 3 3-3 3"/></svg></div>
+     <h3>Next-track preview</h3>
+     <p>See what's loaded on the other deck, with its key and tempo, before the mix begins.</p>
+    </article>
+    <article class="feature reveal">
+     <div class="feature-icon traffic-icon" aria-hidden="true"><span></span></div>
+     <h3>Traffic light mode</h3>
+     <p>Turn the whole screen into the cue colour. Readable from across a dark stage, even out of the corner of your eye.</p>
+    </article>
+    <article class="feature reveal">
+     <div class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></div>
+     <h3>Phone, iPad or laptop</h3>
+     <p>No app store, no account. Maestro runs in the browser and installs to the home screen in two taps.</p>
+    </article>
+    <article class="feature reveal">
+     <div class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="19" r="1" class="fill"/></svg></div>
+     <h3>Local and private</h3>
+     <p>Everything stays on the venue's Wi-Fi. No cloud, no sign-in, nothing recorded.</p>
+    </article>
+    <article class="feature reveal">
+     <div class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></svg></div>
+     <h3>Built for dark stages</h3>
+     <p>Dark mode by default, a light mode for daylight sets, and high-contrast cues that always say what they mean.</p>
+    </article>
+   </div>
+  </div>
+ </section>
+
+ <section class="section audiences" id="musicians">
+  <div class="wrap two-up">
+   <article class="audience reveal">
+    <p class="eyebrow accent">For musicians</p>
+    <h2>Play with confidence, not guesswork.</h2>
+    <ul class="checks">
+     <li>Your written key for every track, transposed for your instrument</li>
+     <li>A clear signal when to come in, and when to lay out</li>
+     <li>See the build coming and land on the drop</li>
+     <li>Works on the phone already in your pocket</li>
+    </ul>
+   </article>
+   <article class="audience reveal">
+    <p class="eyebrow accent">For DJs</p>
+    <h2>Lead the stage without leaving the decks.</h2>
+    <ul class="checks">
+     <li>Cue your musician from djay with one tap, or Space</li>
+     <li>No hand signals, no shouting over the system</li>
+     <li>Mix freely: Maestro follows the crossfader</li>
+     <li>Audio passes straight through the plugin, untouched</li>
+    </ul>
+   </article>
+  </div>
+ </section>
+
+ <section class="section" id="pricing">
+  <div class="wrap">
+   <header class="section-head reveal">
+    <p class="eyebrow accent">Pricing</p>
+    <h2>Free for musicians. Simple for DJs.</h2>
+   </header>
+   <div class="plans">
+    <article class="plan reveal">
+     <h3>Musician</h3>
+     <p class="price"><b>Free</b></p>
+     <p class="plan-sub">The companion app, always free.</p>
+     <ul class="checks"><li>Live key, tempo and beat</li><li>Cue light and traffic light mode</li><li>Phone, iPad and laptop</li></ul>
+     <button class="btn btn-ghost beta" type="button">Open Maestro</button>
+    </article>
+    <article class="plan featured reveal">
+     <p class="badge">Most popular</p>
+     <h3>Duo</h3>
+     <p class="price"><b>$29</b><span>one-time</span></p>
+     <p class="plan-sub">The Maestro Cue plugin for djay Pro.</p>
+     <ul class="checks"><li>Stop / Ready / Play cues</li><li>Live waveform for the musician</li><li>QR join and next-track preview</li><li>Free updates</li></ul>
+     <button class="btn btn-primary beta" type="button">Get Maestro Duo</button>
+    </article>
+    <article class="plan reveal">
+     <h3>Residency</h3>
+     <p class="price"><b>$79</b><span>one-time</span></p>
+     <p class="plan-sub">For venues and touring acts.</p>
+     <ul class="checks"><li>Everything in Duo</li><li>Up to five Macs</li><li>Multiple musicians on one set</li><li>Priority support</li></ul>
+     <button class="btn btn-ghost beta" type="button">Contact us</button>
+    </article>
+   </div>
+  </div>
+ </section>
+
+ <section class="section" id="faq">
+  <div class="wrap narrow">
+   <header class="section-head reveal">
+    <p class="eyebrow accent">FAQ</p>
+    <h2>Questions, answered.</h2>
+   </header>
+   <div class="faq reveal">
+    <details><summary>What do I need?</summary><p>djay Pro on a Mac, and a phone, iPad or laptop with a browser for the musician. Both devices join the same Wi-Fi network.</p></details>
+    <details><summary>Does the plugin change the DJ's sound?</summary><p>No. Maestro Cue passes the audio through unchanged. It only reads the signal to draw the musician's waveform and sends cues on the side.</p></details>
+    <details><summary>Which instruments are supported?</summary><p>Any instrument in C, B♭, E♭ or F: violin, flute, piano, trumpet, clarinet, tenor and soprano sax, alto and baritone sax, French horn and more.</p></details>
+    <details><summary>How fast are the cues?</summary><p>Cues travel over the local network and appear on stage almost instantly, well inside a beat.</p></details>
+    <details><summary>Do I need internet at the venue?</summary><p>No. Maestro runs entirely on the local network. Nothing goes to the cloud.</p></details>
+    <details><summary>What if the signal drops?</summary><p>If the musician's screen stops hearing from the booth, the cue falls back to Stop, so nobody plays on a stale signal.</p></details>
+   </div>
+  </div>
+ </section>
+
+ <section class="section final reveal">
+  <div class="wrap final-inner">
+   <span class="mark big" aria-hidden="true"></span>
+   <h2>Bring your musician into the mix.</h2>
+   <p class="lead">The DJ's set, in the musician's key.</p>
+   <div class="cta-row center"><a class="btn btn-primary" href="#pricing">Get Maestro</a><a class="btn btn-ghost" href="#demo">Replay the demo</a></div>
+  </div>
+ </section>
+</main>
+
+<footer class="footer">
+ <div class="wrap footer-inner">
+  <a class="lockup" href="#top" aria-label="Maestro home"><span class="mark" aria-hidden="true"></span>MAESTRO</a>
+  <p>Works with djay Pro. djay Pro is a trademark of its owner; Maestro is an independent project.</p>
+  <a href="https://github.com/kenneide/maestro">GitHub</a>
+ </div>
+</footer>
+
+<div class="toast" id="toast" role="status" hidden></div>
+<script type="module" src="main.js"></script>
+<script type="module" src="demo.js"></script>
+</body>
+</html>

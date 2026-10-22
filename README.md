@@ -34,6 +34,16 @@ cmake --build plugin/build --config Release
 
 See the [plugin README](plugin/README.md) for installation and djay setup.
 
+## Website
+
+The promotional site lives in [`site/`](site/) and deploys to GitHub Pages at https://kenneide.github.io/maestro/ on every push to `main` that touches it. It reuses the design tokens, mark and the client's `music.js`, so it stays in step with the apps.
+
+```sh
+npm --prefix site start
+```
+
+Open http://localhost:4180. The live demo is a simulated set; no djay connection is needed.
+
 ## Project docs
 
 - [Project description](docs/project-description.txt)
