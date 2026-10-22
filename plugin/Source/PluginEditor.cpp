@@ -1,6 +1,20 @@
 #include "PluginEditor.h"
 #include <BinaryData.h>
 
+namespace
+{
+// Cue text and labels use Arial Bold like the web app; tracking is a fraction of the font height.
+juce::Font arial (float size, float tracking = 0.0f)
+{
+    return juce::Font (juce::FontOptions ("Arial", size, juce::Font::bold)).withExtraKerningFactor (tracking);
+}
+
+float textWidth (const juce::Font& font, const juce::String& text)
+{
+    return juce::GlyphArrangement::getStringWidth (font, text);
+}
+}
+
 void MaestroCueEditor::Look::drawButtonBackground (juce::Graphics& g, juce::Button& b,
                                                   const juce::Colour& colour, bool hover, bool down)
 {
@@ -26,12 +40,95 @@ void MaestroCueEditor::Look::drawTextEditorOutline (juce::Graphics& g, int width
                             static_cast<float> (MaestroDesign::radius_control), invalid || focused ? 2.0f : 1.0f);
 }
 
-juce::Font MaestroCueEditor::Look::getTextButtonFont (juce::TextButton& b, int)
+juce::Font MaestroCueEditor::Look::getTextButtonFont (juce::TextButton&, int)
 {
-    // Match the web cue's Arial Bold with normal tracking; other controls keep the native font.
-    if (b.getComponentID() == "cue")
-        return juce::Font (juce::FontOptions ("Arial", 88.0f, juce::Font::bold)).withExtraKerningFactor (0.0f);
     return juce::FontOptions (static_cast<float> (MaestroDesign::type_body), juce::Font::bold);
+}
+
+void MaestroCueEditor::CueButton::setCue (const juce::String& nextWord, const juce::String& nextState, juce::Colour textColour,
+                                          juce::Colour fillColour, const MaestroDesign::Palette& themePalette)
+{
+    word = nextWord;
+    next = nextState;
+    text = textColour;
+    fill = fillColour;
+    palette = themePalette;
+    repaint();
+}
+
+void MaestroCueEditor::CueButton::paintButton (juce::Graphics& g, bool over, bool down)
+{
+    const auto radius = static_cast<float> (MaestroDesign::radius_panel);
+    auto bounds = getLocalBounds().toFloat().reduced (1.5f);
+    if (hasKeyboardFocus (true))
+    {
+        g.setColour (palette.focus);
+        g.drawRoundedRectangle (bounds, radius + 1.0f, 2.0f);
+        bounds = bounds.reduced (4.0f);
+    }
+    if (down) bounds = bounds.reduced (2.0f);
+    g.setColour (over ? palette.raised.brighter (0.04f) : palette.raised);
+    g.fillRoundedRectangle (bounds, radius);
+    g.setColour (text);
+    g.drawRoundedRectangle (bounds, radius, 3.0f);
+
+    auto content = bounds.reduced (24.0f, 0.0f);
+    const auto lamp = content.removeFromLeft (68.0f).withSizeKeepingCentre (68.0f, 68.0f);
+    juce::Path disc;
+    disc.addEllipse (lamp);
+    juce::DropShadow (fill.withAlpha (0.7f), 30, {}).drawForPath (g, disc);
+    g.setColour (fill);
+    g.fillPath (disc);
+    content.removeFromLeft (22.0f);
+
+    // The Space hint chip mirrors the web mock-up's keycap.
+    const auto hintFont = arial (11.0f, 0.14f);
+    const auto hintWidth = textWidth (hintFont, "SPACE") + 18.0f;
+    const auto hint = content.removeFromRight (hintWidth).withSizeKeepingCentre (hintWidth, 24.0f);
+    g.setColour (palette.line.withAlpha (0.6f));
+    g.drawRoundedRectangle (hint, static_cast<float> (MaestroDesign::radius_small), 1.0f);
+    g.setColour (palette.muted);
+    g.setFont (hintFont);
+    g.drawText ("SPACE", hint, juce::Justification::centred);
+
+    g.setColour (text);
+    const auto wordFont = arial (64.0f);
+    if (next.isEmpty())
+    {
+        g.setFont (wordFont);
+        g.drawText (word, content, juce::Justification::centredLeft);
+        return;
+    }
+    auto stack = content.withSizeKeepingCentre (content.getWidth(), 92.0f);
+    g.setFont (wordFont);
+    g.drawText (word, stack.removeFromTop (68.0f), juce::Justification::centredLeft);
+    g.setFont (arial (13.0f, 0.08f));
+    g.drawText ("NEXT: " + next.toUpperCase(), stack, juce::Justification::centredLeft);
+}
+
+void MaestroCueEditor::StepButton::setStyle (juce::Colour cueColour, juce::Colour focusColour)
+{
+    colour = cueColour;
+    focus = focusColour;
+    repaint();
+}
+
+void MaestroCueEditor::StepButton::paintButton (juce::Graphics& g, bool over, bool down)
+{
+    const auto on = getToggleState();
+    const auto radius = static_cast<float> (MaestroDesign::radius_control);
+    auto bounds = getLocalBounds().toFloat().reduced (1.0f);
+    if (down) bounds = bounds.reduced (1.0f);
+    if (on || over)
+    {
+        g.setColour (colour.withAlpha (on ? 0.12f : 0.06f));
+        g.fillRoundedRectangle (bounds, radius);
+    }
+    g.setColour (hasKeyboardFocus (true) ? focus : colour.withAlpha (on ? 1.0f : over ? 0.7f : 0.4f));
+    g.drawRoundedRectangle (bounds, radius, 2.0f);
+    g.setColour (colour.withAlpha (on ? 1.0f : 0.8f));
+    g.setFont (arial (13.0f, 0.14f));
+    g.drawText (getName(), bounds, juce::Justification::centred);
 }
 
 void MaestroCueEditor::IconButton::setIcon (const void* data, size_t size, juce::Colour colour)
@@ -80,16 +177,18 @@ MaestroCueEditor::MaestroCueEditor (MaestroCueProcessor& p)
     light = preferences.getBoolValue ("light", false);
     mark = juce::Drawable::createFromImageData (BinaryData::mark_svg, BinaryData::mark_svgSize);
     setLookAndFeel (&look);
-    cueButton.setComponentID ("cue");
+    using Cue = MaestroCueProcessor::Cue;
     cueButton.onClick = [this] { cueProcessor.advanceCue(); refresh(); };
     addAndMakeVisible (cueButton);
-    // Shows where a Ready cue is heading; a child so it hides with the button.
-    nextLabel.setJustificationType (juce::Justification::centred);
-    nextLabel.setFont (juce::Font (juce::FontOptions ("Arial", static_cast<float> (MaestroDesign::type_heading), juce::Font::bold))
-                          .withExtraKerningFactor (0.08f));
-    nextLabel.setInterceptsMouseClicks (false, false);
-    nextLabel.setAccessible (false);
-    cueButton.addAndMakeVisible (nextLabel);
+    stopStep.onClick = [this] { cueProcessor.setCue (Cue::stop); refresh(); };
+    readyStep.onClick = [this] { cueProcessor.setCue (MaestroCueProcessor::readyFrom (cueProcessor.getCue())); refresh(); };
+    playStep.onClick = [this] { cueProcessor.setCue (Cue::play); refresh(); };
+    for (auto [step, word] : { std::pair { &stopStep, "Stop" }, std::pair { &readyStep, "Ready" }, std::pair { &playStep, "Play" } })
+    {
+        step->setTitle ("Set cue to " + juce::String (word));
+        step->setTooltip ("Set cue to " + juce::String (word));
+        addAndMakeVisible (*step);
+    }
     settingsButton.onClick = [this] { showSettings (! settingsOpen); };
     addAndMakeVisible (settingsButton);
     addChildComponent (settingsPanel);
@@ -152,11 +251,16 @@ MaestroCueEditor::MaestroCueEditor (MaestroCueProcessor& p)
     label (addressLabel, "LOCAL ADDRESS");
     label (helpLabel, "Run Maestro in LAN mode on the destination Mac.\nConnect the musician's device to the same network.");
     urlLabel.setMinimumHorizontalScale (1.0f);
-    footer.setJustificationType (juce::Justification::centredLeft);
-    footer.setFont (juce::FontOptions (static_cast<float> (MaestroDesign::type_caption)));
-    addAndMakeVisible (footer);
+    destinationLabel.setFont (juce::FontOptions (juce::Font::getDefaultMonospacedFontName(), 14.0f, juce::Font::plain));
+    statusLabel.setFont (juce::FontOptions (static_cast<float> (MaestroDesign::type_caption)));
+    statusLabel.setJustificationType (juce::Justification::centredRight);
+    for (auto* component : { &destinationLabel, &statusLabel })
+    {
+        component->setBorderSize (juce::BorderSize<int> (0));
+        addAndMakeVisible (*component);
+    }
     setWantsKeyboardFocus (true);
-    setSize (480, 560);
+    setSize (640, 430);
     updateIcons();
     refresh();
     startTimerHz (4);
@@ -172,54 +276,72 @@ void MaestroCueEditor::paint (juce::Graphics& g)
 {
     const auto& palette = look.palette;
     g.fillAll (palette.bg);
+    // MAESTRO / CUE lockup, as in the musician app's header.
     if (mark)
     {
         auto icon = mark->createCopy();
         icon->replaceColour (juce::Colours::white, palette.accent);
-        icon->drawWithin (g, { 24.0f, 22.0f, 28.0f, 28.0f }, juce::RectanglePlacement::centred, 1.0f);
+        icon->drawWithin (g, { 24.0f, 32.0f, 20.0f, 20.0f }, juce::RectanglePlacement::centred, 1.0f);
     }
+    const auto brand = arial (17.0f, 0.16f);
+    const auto brandWidth = textWidth (brand, "MAESTRO");
     g.setColour (palette.ink);
-    g.setFont (juce::FontOptions (static_cast<float> (MaestroDesign::type_brand), juce::Font::bold));
-    g.drawText ("MAESTRO", 62, 18, 240, 25, juce::Justification::centredLeft);
+    g.setFont (brand);
+    g.drawText ("MAESTRO", juce::Rectangle<float> (54.0f, 30.0f, brandWidth + 4.0f, 24.0f), juce::Justification::centredLeft);
     g.setColour (palette.muted);
-    g.setFont (juce::FontOptions (static_cast<float> (MaestroDesign::type_caption)));
-    g.drawText (settingsOpen ? "SETTINGS" : "CUE / DJ COMPANION", 63, 43, 240, 16, juce::Justification::centredLeft);
-    g.setColour (palette.line);
-    g.drawHorizontalLine (82, 24.0f, static_cast<float> (getWidth() - 24));
-    g.drawHorizontalLine (516, 24.0f, static_cast<float> (getWidth() - 24));
+    g.setFont (juce::FontOptions (17.0f));
+    g.drawText ("/", juce::Rectangle<float> (62.0f + brandWidth, 30.0f, 12.0f, 24.0f), juce::Justification::centred);
+    g.setFont (arial (11.0f, 0.12f));
+    g.drawText (settingsOpen ? "SETTINGS" : "CUE", juce::Rectangle<float> (82.0f + brandWidth, 32.0f, 120.0f, 22.0f),
+                juce::Justification::centredLeft);
+
+    g.setColour (palette.line.withAlpha (0.45f));
+    g.drawHorizontalLine (76, 24.0f, static_cast<float> (getWidth() - 24));
+    g.drawHorizontalLine (368, 24.0f, static_cast<float> (getWidth() - 24));
     if (settingsOpen)
-        g.drawHorizontalLine (246, 24.0f, static_cast<float> (getWidth() - 24));
+        g.drawVerticalLine (getWidth() / 2, 92.0f, 352.0f);
     else
     {
         g.setColour (palette.muted);
-        g.drawText ("CUE", 24, 94, getWidth() - 48, 16, juce::Justification::centredLeft);
+        g.setFont (juce::FontOptions (static_cast<float> (MaestroDesign::type_body)));
+        g.drawText ("Click or press Space to send the next cue", 24, 274, getWidth() - 48, 18, juce::Justification::centredLeft);
     }
+    g.setColour (palette.muted);
+    g.setFont (arial (12.0f, 0.12f));
+    g.drawText ("SEND TO", 24, 386, 84, 20, juce::Justification::centredLeft);
 }
 
 void MaestroCueEditor::resized()
 {
     settingsButton.setBounds (getWidth() - 68, 20, 44, 44);
-    cueButton.setBounds (24, 130, getWidth() - 48, 362);
-    nextLabel.setBounds (0, cueButton.getHeight() - 88, cueButton.getWidth(), 32);
-    settingsPanel.setBounds (24, 82, getWidth() - 48, 430);
-    connectionHeading.setBounds (0, 12, 432, 16);
-    hostLabel.setBounds (0, 34, 224, 14);
-    portLabel.setBounds (236, 34, 92, 14);
-    webPortLabel.setBounds (340, 34, 92, 14);
-    hostField.setBounds (0, 54, 224, 44);
-    portField.setBounds (236, 54, 92, 44);
-    webPortField.setBounds (340, 54, 92, 44);
-    applyButton.setBounds (0, 110, 80, 44);
-    appearanceLabel.setBounds (236, 110, 140, 44);
-    themeButton.setBounds (388, 110, 44, 44);
-    musicianHeading.setBounds (0, 176, 432, 16);
-    qrView.setBounds (0, 202, 184, 184);
-    scanLabel.setBounds (200, 202, 232, 20);
-    urlLabel.setBounds (200, 226, 232, 48);
-    addressLabel.setBounds (200, 292, 232, 16);
-    addressSelector.setBounds (200, 314, 232, 36);
-    helpLabel.setBounds (0, 388, 432, 40);
-    footer.setBounds (24, 524, getWidth() - 48, 20);
+    cueButton.setBounds (24, 96, getWidth() - 48, 170);
+    const auto stepWidth = (getWidth() - 48 - 2 * 14) / 3;
+    stopStep.setBounds (24, 304, stepWidth, 44);
+    readyStep.setBounds (24 + stepWidth + 14, 304, stepWidth, 44);
+    playStep.setBounds (getWidth() - 24 - stepWidth, 304, stepWidth, 44);
+    destinationLabel.setBounds (108, 386, 280, 20);
+    statusLabel.setBounds (388, 386, getWidth() - 412, 20);
+
+    // Settings: connection and appearance on the left, the musician app's QR code on the right.
+    settingsPanel.setBounds (24, 76, getWidth() - 48, 292);
+    const auto column = (settingsPanel.getWidth() - 32) / 2, right = column + 32, half = (column - 12) / 2;
+    connectionHeading.setBounds (0, 16, column, 16);
+    hostLabel.setBounds (0, 40, column, 14);
+    hostField.setBounds (0, 58, column, 40);
+    portLabel.setBounds (0, 110, half, 14);
+    webPortLabel.setBounds (half + 12, 110, half, 14);
+    portField.setBounds (0, 128, half, 40);
+    webPortField.setBounds (half + 12, 128, half, 40);
+    applyButton.setBounds (0, 180, 90, 40);
+    appearanceLabel.setBounds (0, 236, column - 56, 44);
+    themeButton.setBounds (column - 44, 236, 44, 44);
+    musicianHeading.setBounds (right, 16, column, 16);
+    qrView.setBounds (right, 40, 136, 136);
+    scanLabel.setBounds (right + 148, 40, column - 148, 16);
+    urlLabel.setBounds (right + 148, 60, column - 148, 64);
+    addressLabel.setBounds (right, 186, column, 16);
+    addressSelector.setBounds (right, 206, column, 34);
+    helpLabel.setBounds (right, 248, column, 40);
 }
 
 void MaestroCueEditor::showSettings (bool open)
@@ -240,7 +362,9 @@ void MaestroCueEditor::showSettings (bool open)
         addressSelector.setSelectedItemIndex (addresses.indexOf (localAddress), juce::dontSendNotification);
     }
     settingsPanel.setVisible (open);
-    cueButton.setVisible (! open);
+    for (auto* component : { static_cast<juce::Component*> (&cueButton), static_cast<juce::Component*> (&stopStep),
+                             static_cast<juce::Component*> (&readyStep), static_cast<juce::Component*> (&playStep) })
+        component->setVisible (! open);
     settingsButton.setTitle (open ? "Close settings" : "Settings");
     settingsButton.setTooltip (open ? "Close settings" : "Settings");
     refresh();
@@ -310,17 +434,18 @@ void MaestroCueEditor::refresh()
     const auto cue = cueProcessor.getCue();
     const auto ready = cue == Cue::readyToPlay || cue == Cue::readyToStop;
     const auto colour = cue == Cue::play ? palette.cueGreen : ready ? palette.cueAmber : palette.cueRed;
+    const auto fill = cue == Cue::play ? palette.cueGreenFill : ready ? palette.cueAmberFill : palette.cueRedFill;
     const juce::String text = cue == Cue::play ? "Play" : ready ? "Ready" : "Stop";
     const juce::String next = cue == Cue::readyToPlay ? "Play" : cue == Cue::readyToStop ? "Stop" : "";
-    cueButton.setButtonText (text);
+    cueButton.setCue (text, next, colour, fill, palette);
     cueButton.setTitle ("Performance cue: " + text + (ready ? ", next " + next : juce::String()));
     cueButton.setTooltip ("Click or press Space to advance the cue");
-    nextLabel.setText (ready ? "NEXT: " + next.toUpperCase() : juce::String(), juce::dontSendNotification);
-    nextLabel.setColour (juce::Label::textColourId, colour);
-    cueButton.setColour (juce::TextButton::buttonColourId, palette.bg);
-    cueButton.setColour (juce::TextButton::buttonOnColourId, palette.bg);
-    cueButton.setColour (juce::TextButton::textColourOffId, colour);
-    cueButton.setColour (juce::TextButton::textColourOnId, colour);
+    stopStep.setStyle (palette.cueRed, palette.focus);
+    readyStep.setStyle (palette.cueAmber, palette.focus);
+    playStep.setStyle (palette.cueGreen, palette.focus);
+    stopStep.setToggleState (cue == Cue::stop, juce::dontSendNotification);
+    readyStep.setToggleState (ready, juce::dontSendNotification);
+    playStep.setToggleState (cue == Cue::play, juce::dontSendNotification);
     const auto themeTitle = light ? "Switch to dark mode" : "Switch to light mode";
     themeButton.setTitle (themeTitle);
     themeButton.setTooltip (themeTitle);
@@ -352,10 +477,13 @@ void MaestroCueEditor::refresh()
     look.setColour (juce::PopupMenu::highlightedTextColourId, palette.ink);
     const auto destination = cueProcessor.getDestination();
     const auto target = destination.host + ":" + juce::String (destination.port);
-    footer.setColour (juce::Label::textColourId, destinationInvalid || ! cueProcessor.isConnected() ? palette.cueRed : palette.muted);
-    footer.setText (destinationInvalid ? juce::String ("Enter a valid host and ports from 1 to 65535")
-                    : cueProcessor.isConnected() ? "Sending to " + target : "Send failed: " + target,
-                    juce::dontSendNotification);
+    destinationLabel.setColour (juce::Label::textColourId, palette.ink);
+    destinationLabel.setText (destination.host + " : " + juce::String (destination.port), juce::dontSendNotification);
+    destinationLabel.setTitle ("Sending cues to " + target);
+    statusLabel.setColour (juce::Label::textColourId, destinationInvalid || ! cueProcessor.isConnected() ? palette.cueRed : palette.muted);
+    statusLabel.setText (destinationInvalid ? juce::String ("Enter a valid host and ports from 1 to 65535")
+                         : cueProcessor.isConnected() ? "Sending" : "Send failed",
+                         juce::dontSendNotification);
     if (settingsOpen) updateLink();
     repaint();
 }

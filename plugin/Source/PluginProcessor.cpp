@@ -130,11 +130,11 @@ void MaestroCueProcessor::sendWave()
     sender.sendToIPAddress (target.host, target.port, bundle);
 }
 
-void MaestroCueProcessor::advanceCue()
+void MaestroCueProcessor::setCue (Cue cue)
 {
     auto* param = state.getParameter (cueParamId);
     param->beginChangeGesture();
-    param->setValueNotifyingHost (param->convertTo0to1 (static_cast<float> (nextCue (getCue()))));
+    param->setValueNotifyingHost (param->convertTo0to1 (static_cast<float> (cue)));
     param->endChangeGesture();
 }
 

@@ -32,6 +32,32 @@ private:
         std::unique_ptr<juce::Drawable> image;
     } settingsButton { "Settings" }, themeButton { "Appearance" };
 
+    // The large cue panel: a lit lamp, the cue word, where Ready is heading, and the Space hint.
+    class CueButton final : public juce::Button
+    {
+    public:
+        CueButton() : Button ("Cue") {}
+        void setCue (const juce::String& word, const juce::String& next, juce::Colour text, juce::Colour fill,
+                     const MaestroDesign::Palette&);
+        void paintButton (juce::Graphics&, bool, bool) override;
+    private:
+        juce::String word, next;
+        juce::Colour text, fill;
+        MaestroDesign::Palette palette = MaestroDesign::dark;
+    } cueButton;
+
+    // STOP / READY / PLAY: sets that cue directly; the current one is lit.
+    class StepButton final : public juce::Button
+    {
+    public:
+        explicit StepButton (const juce::String& name) : Button (name) { setClickingTogglesState (false); setToggleable (true); }
+        void setStyle (juce::Colour cue, juce::Colour focus);
+        void paintButton (juce::Graphics&, bool, bool) override;
+    private:
+        juce::Colour colour;
+        juce::Colour focus;
+    } stopStep { "STOP" }, readyStep { "READY" }, playStep { "PLAY" };
+
     class QrView final : public juce::Component
     {
     public:
@@ -55,9 +81,7 @@ private:
     bool light = false, settingsOpen = false;
     juce::PropertiesFile preferences;
     std::unique_ptr<juce::Drawable> mark;
-    juce::TextButton cueButton;
-    juce::Label nextLabel;
-    juce::Label footer;
+    juce::Label destinationLabel, statusLabel;
     juce::Component settingsPanel;
     juce::TextEditor hostField, portField, webPortField;
     juce::TextButton applyButton;

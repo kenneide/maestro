@@ -54,6 +54,12 @@ void testState (const juce::PropertiesFile::Options& options)
         processor.advanceCue();
         require (processor.getCue() == expected, "Cue cycles Stop, Ready, Play, Ready, Stop");
     }
+    for (auto [from, ready] : { std::pair { Cue::stop, Cue::readyToPlay }, std::pair { Cue::readyToPlay, Cue::readyToPlay },
+                                std::pair { Cue::play, Cue::readyToStop }, std::pair { Cue::readyToStop, Cue::readyToStop } })
+        require (MaestroCueProcessor::readyFrom (from) == ready, "Ready heads to Stop while playing, otherwise to Play");
+    processor.setCue (Cue::play);
+    require (processor.getCue() == Cue::play, "Step buttons set a cue directly");
+    processor.setCue (Cue::readyToStop);
     juce::MemoryBlock data;
     processor.getStateInformation (data);
     MaestroCueProcessor restored (options);

@@ -68,8 +68,11 @@ public:
     juce::AudioProcessorValueTreeState& getState() { return state; }
     Cue getCue() const { return static_cast<Cue> (juce::jlimit (0, 3, juce::roundToInt (cueParam->load()))); }
     static Cue nextCue (Cue cue) { return static_cast<Cue> ((static_cast<int> (cue) + 1) % 4); }
-    // Message thread only: moves to the next cue as a single host gesture.
-    void advanceCue();
+    // Ready warns of the change ahead: towards Stop while playing, otherwise towards Play.
+    static Cue readyFrom (Cue cue) { return cue == Cue::play || cue == Cue::readyToStop ? Cue::readyToStop : Cue::readyToPlay; }
+    // Message thread only: each change is a single host gesture.
+    void advanceCue() { setCue (nextCue (getCue())); }
+    void setCue (Cue);
     bool isConnected() const { return connected.load(); }
 
     Destination getDestination() const;
