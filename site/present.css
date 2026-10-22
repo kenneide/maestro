@@ -49,21 +49,21 @@ h1,h2,h3,p,ol,ul,figure{margin:0}
 .flow-step{font:700 34px/1.1 Arial,sans-serif}
 .flow-card p{font-size:26px;color:var(--muted);line-height:1.35}
 .flow-art{height:180px;border-radius:20px;background:var(--bg);display:flex;align-items:center;justify-content:center;gap:20px;font-family:Arial,sans-serif}
-.flow-arrow{position:relative}
-.flow-arrow::before{content:"";position:absolute;left:14px;right:22px;top:50%;border-top:5px dotted var(--accent)}
-.flow-arrow::after{content:"";position:absolute;right:8px;top:calc(50% - 13px);border:13px solid transparent;border-left:18px solid var(--accent)}
+/* Arrows sit level with the centre of the picture boxes (card padding + title + gap). */
+.flow-arrow{align-self:start;margin-top:calc(34px + 37px + 22px);height:180px;display:flex;align-items:center;justify-content:center}
+.flow-arrow svg{width:80px;height:27px;overflow:visible}
+.a-line{fill:none;stroke:var(--accent);stroke-width:5;stroke-linecap:round;stroke-dasharray:0 11}
+.a-head{fill:var(--accent)}
 .deck-art i{width:96px;height:96px;border-radius:50%;border:3px solid var(--line);background:conic-gradient(var(--raised),var(--surface))}
 .cue-art b{font-size:60px;color:var(--cue-amber)}
-/* A mini musician screen: the cue above the key, centred. */
-.device-art{flex-direction:column;gap:6px}
-.device-cue{display:flex;align-items:center;gap:14px;color:var(--cue-green)}
-.device-cue .lamp{width:34px;height:34px}
-.device-cue b{font-size:44px;line-height:1}
-.device-key{display:flex;align-items:baseline;justify-content:center;gap:12px}
-.device-key b{font-size:72px;line-height:1}
-/* Arial has no flat sign, so draw one at the cue type's weight. */
-.flat{width:.4em;height:.92em;margin-left:.04em;fill:none;stroke:currentColor;stroke-width:9;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.02em}
-.device-key span{font-size:32px}
+/* A mini musician screen drawn as one fixed SVG, laid out like the app: CUE word, then the key. */
+.device-svg{display:block;width:100%;height:100%}
+.d-label{font:700 14px Arial,sans-serif;letter-spacing:.14em;fill:var(--muted)}
+.d-cue{font:700 60px Arial,sans-serif;fill:var(--cue-green)}
+.d-key{font:700 64px Arial,sans-serif;fill:var(--ink)}
+.d-mode{font:400 26px Arial,sans-serif;fill:var(--ink)}
+.d-flat{fill:none;stroke:var(--ink);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+.d-rule{stroke:var(--line);stroke-opacity:.5;stroke-width:1.5}
 .lamp{display:inline-block;width:72px;height:72px;border-radius:50%;flex-shrink:0}
 .lamp.ready{background:var(--cue-amber-fill);box-shadow:0 0 40px color-mix(in srgb,var(--cue-amber-fill) 70%,transparent)}
 .lamp.play{background:var(--cue-green-fill);box-shadow:0 0 40px color-mix(in srgb,var(--cue-green-fill) 70%,transparent)}
