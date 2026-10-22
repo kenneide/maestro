@@ -91,19 +91,15 @@ void MaestroCueEditor::CueButton::paintButton (juce::Graphics& g, bool over, boo
     g.setFont (hintFont);
     g.drawText ("SPACE", hint, juce::Justification::centred);
 
+    // The cue word stays centred in every state; Ready's Next line hangs below it without moving it,
+    // like the musician app's cue.
     g.setColour (text);
-    const auto wordFont = arial (64.0f);
-    if (next.isEmpty())
-    {
-        g.setFont (wordFont);
-        g.drawText (word, content, juce::Justification::centredLeft);
-        return;
-    }
-    auto stack = content.withSizeKeepingCentre (content.getWidth(), 92.0f);
-    g.setFont (wordFont);
-    g.drawText (word, stack.removeFromTop (68.0f), juce::Justification::centredLeft);
+    g.setFont (arial (64.0f));
+    g.drawText (word, content, juce::Justification::centredLeft);
+    if (next.isEmpty()) return;
     g.setFont (arial (13.0f, 0.08f));
-    g.drawText ("NEXT: " + next.toUpperCase(), stack, juce::Justification::centredLeft);
+    g.drawText ("NEXT: " + next.toUpperCase(), content.withTop (content.getCentreY() + 36.0f).withHeight (18.0f),
+                juce::Justification::centredLeft);
 }
 
 void MaestroCueEditor::StepButton::setStyle (juce::Colour cueColour, juce::Colour focusColour)
