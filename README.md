@@ -36,7 +36,7 @@ See the [plugin README](plugin/README.md) for installation and djay setup.
 
 ## Website
 
-The promotional site lives in [`site/`](site/) and deploys to GitHub Pages at https://kenneide.github.io/maestro/ on every push to `main` that touches it. It reuses the design tokens, mark and the client's `music.js`, so it stays in step with the apps.
+The promotional site lives in [`site/`](site/) and deploys to GitHub Pages at https://maestro.alanocinneide.com/ on every push to `main` that touches it. It reuses the design tokens, mark and the client's `music.js`, so it stays in step with the apps.
 
 ```sh
 npm --prefix site start
@@ -54,3 +54,9 @@ Open http://localhost:4180. The live demo is a simulated set; no djay connection
 ## Shared design and themes
 
 Both apps use the [Maestro design system](design/README.md), with shared brand assets and generated web/JUCE theme tokens. Use the header's **Light mode / Dark mode** button to switch appearance. Both default to dark and remember the selection. Node.js 18+ is also required when configuring the plugin to verify shared assets.
+
+## Website custom domain
+
+GitHub Pages serves the promotional site at `https://maestro.alanocinneide.com/`. Cloudflare manages the DNS-only `maestro` CNAME pointing to `kenneide.github.io`. GitHub Pages settings associate that hostname with this repository; the Actions deployment does not need a repository `CNAME` file. The existing website workflow continues to publish relevant pushes to `main`. Enable Enforce HTTPS when GitHub has issued the domain certificate.
+
+Only the explicitly copied public website files are deployed. The website includes the simulated demo and presentation; the local djay/OSC bridge and Audio Unit are not hosted services.
