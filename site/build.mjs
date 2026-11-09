@@ -27,4 +27,6 @@ await cp(join(site, 'assets'), join(out, 'assets'), {recursive: true});
 for (const [name, source] of Object.entries(shared)) await cp(join(root, source), join(out, 'shared', name));
 // GitHub Pages would otherwise run Jekyll over the output.
 await writeFile(join(out, '.nojekyll'), '');
+// Missing files must be 404 responses, not the homepage.
+await writeFile(join(out, '404.html'), '<!doctype html><meta charset="utf-8"><title>404</title>');
 console.log(`Built ${out}`);
