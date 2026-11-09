@@ -60,3 +60,8 @@ Both apps use the [Maestro design system](design/README.md), with shared brand a
 GitHub Pages serves the promotional site at `https://maestro.alanocinneide.com/`. Cloudflare manages the DNS-only `maestro` CNAME pointing to `kenneide.github.io`. GitHub Pages settings associate that hostname with this repository; the Actions deployment does not need a repository `CNAME` file. The existing website workflow continues to publish relevant pushes to `main`. Enable Enforce HTTPS when GitHub has issued the domain certificate.
 
 Only the explicitly copied public website files are deployed. The website includes the simulated demo and presentation; the local djay/OSC bridge and Audio Unit are not hosted services.
+
+
+## Production hosting and updates
+
+The public website is https://maestro.alanocinneide.com/, hosted by the GitHub-connected Cloudflare Pages project `maestro`. Push to this repository’s `main` branch to trigger an automatic Cloudflare build and deployment; no dashboard upload is needed. The build command is `npm run check && npm run build (root directory: site)`, and only `site/_site` is published. Cloudflare manages custom-domain certificates and HTTP-to-HTTPS redirects. Check the Cloudflare status on the GitHub commit before treating an update as live. Existing GitHub Pages workflows remain as a fallback; production DNS points to Cloudflare. Do not change mail records when maintaining website DNS.
